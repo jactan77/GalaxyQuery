@@ -1,8 +1,6 @@
 
 
 enum class DQLTOKENS{
-      SELECT,
-      FROM,
-      WHERE,
-      ORDER_BUY,
+      SELECT // ex. SELECT(requires Token) column FROM table;
+
  };
