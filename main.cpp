@@ -23,8 +23,7 @@ auto main()-> int {
 
     std::getline(std::cin,getQuery);
     try {
-        Db db = InterpreterQuery::processQuery(getQuery);
-        std::cout <<"Db is create successfully" << " "<< db.name;
+        InterpreterQuery::processQuery(getQuery);
     }catch (...) {
         std::cout << "WrongQuery" << std::endl;
     }

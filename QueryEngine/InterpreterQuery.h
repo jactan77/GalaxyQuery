@@ -1,23 +1,25 @@
 
 #include <iostream>
-#include <ranges>
-#include <string>
 #include <algorithm>
+#include <ranges>
+#include "../DataEntry/DB.h"
+#include <string>
 #include <vector>
-#include "../QueryTokens/DDL.h"
+#include <map>
 #ifndef INTERPRETERQUERY_H
 #define INTERPRETERQUERY_H
 
 
 
 class InterpreterQuery {
-    public:
-            static auto processQuery(std::string input)->Db;
-            static auto getTokens(std::string element)->std::vector<std::string>;
-            static inline auto GalaxyKeywords = std::vector<std::string>{
-                "SELECT", "INSERT", "UPDATE", "DELETE",
-                "CREATE", "ALTER", "DROP"
-            };
+public:
+    static auto processQuery(std::string input)->void;
+    static auto getTokens(std::string element)->std::vector<std::string>;
+    static auto initializeCreate(std::string createStatement) -> bool;
+    static inline auto GalaxyKeywords = std::vector<std::string> {
+        "SELECT", "INSERT", "UPDATE", "DELETE",
+          "CREATE", "ALTER", "DROP"
+    };
 };
 
 
