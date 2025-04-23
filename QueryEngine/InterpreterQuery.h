@@ -5,6 +5,7 @@
 #include "../DataEntry/DB.h"
 #include <string>
 #include <vector>
+#include <regex>
 #include <map>
 #ifndef INTERPRETERQUERY_H
 #define INTERPRETERQUERY_H

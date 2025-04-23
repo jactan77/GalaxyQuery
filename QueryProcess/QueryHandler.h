@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <ranges>
 #include <map>
 #include "../DataEntry/DB.h"
 #include "../DataEntry/Table.h"
@@ -23,7 +24,9 @@ class QueryHandler {
         static auto processSelect(std::vector<std::string> selectQuery)-> void;
         static auto processAlter(std::vector<std::string> alterQuery)-> void;
         static auto processDrop(std::vector<std::string> dropQuery)-> void;
-
+        static inline auto dataTypes = std::vector<std::string>{
+                "INT","STRING", "CHAR", "BOOL"
+        };
 
 };
 
