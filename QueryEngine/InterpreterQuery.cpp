@@ -2,19 +2,27 @@
 
 #include "InterpreterQuery.h"
 
-#include "../QueryProcess/QueryHandler.h"
 
 
-auto InterpreterQuery::processQuery(std::string input) -> void{
-    auto tokens = getTokens(input); // tokens.front must match one of {"SELECT", "INSERT", "UPDATE", "DELETE", "CREATE", "ALTER", "DROP"}
-            auto it = std::ranges::find(GalaxyKeywords.begin(),GalaxyKeywords.end(),tokens.front());
-            if (it == GalaxyKeywords.end()) {
-                throw std::runtime_error("Wrong Query");
+
+auto InterpreterQuery::processQuery(Db*& db,std::string input) -> void{
+            auto tokens = getTokens(input); // tokens.front must match one of {"SELECT", "INSERT", "UPDATE", "DELETE", "CREATE", "ALTER", "DROP"}
+            auto it = GalaxyKeywords.find(tokens.at(0));
+            if (tokens.at(0) == "CREATE" && tokens.at(1)=="DATABASE" && db == nullptr) {
+                if (tokens.size() != 3 ) {
+                    throw;
+                }
+                delete db;
+                db = new Db(std::string(tokens.at(2)));
+                std::cout << "You have created a database named : " << db->getName() << std::endl;
+                return;
             }
-            if (tokens.at(0) == "CREATE") {
-                    QueryHandler::processCreate(std::vector(tokens.begin()+1,tokens.end()));
-            }
 
+            if (it != GalaxyKeywords.end() && db != nullptr) {
+                it->second(db,std::vector(tokens.begin()+1,tokens.end()));
+            } else {
+                throw std::runtime_error("Invalid operation or your database doesn't exist");
+            }
 }
 
 auto InterpreterQuery::getTokens(std::string element)->std::vector<std::string>{
@@ -45,3 +53,4 @@ auto InterpreterQuery::getTokens(std::string element)->std::vector<std::string>{
             }
          return tokens;
 }
+

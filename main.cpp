@@ -7,7 +7,7 @@
 #include "QueryEngine/InterpreterQuery.h"
 
 auto main()-> int {
-    auto session = std::vector<Db>();
+    Db* db = nullptr;
     std::string const logo = R"(
   ____       _            _  ___
  / ___| __ _| | __ ___  _(_)/ _ \ _   _  ___ _ __ _   _
@@ -17,16 +17,24 @@ auto main()-> int {
                                                   |___/
  )";
     std::cout << logo << std::endl;
-    std::cout << "Start typing" << std::endl;
+
+
 
     auto getQuery = std::string();
+    std::cout << "Start typing" << std::endl;
 
-    std::getline(std::cin,getQuery);
-    try {
-        InterpreterQuery::processQuery(getQuery);
-    }catch (...) {
-        std::cout << "WrongQuery" << std::endl;
+
+    while (std::getline(std::cin,getQuery) &&  getQuery != "end") {
+            try {
+                InterpreterQuery::processQuery(db,getQuery);
+            }  catch (const std::exception & ex) {
+                std::cout <<ex.what() << std::endl;
+            }
+            std::cout << "Start typing" << std::endl;
+
     }
+
+
 
 
 
