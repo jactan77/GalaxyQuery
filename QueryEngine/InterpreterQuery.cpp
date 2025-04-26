@@ -17,6 +17,15 @@ auto InterpreterQuery::processQuery(Db*& db,std::string input) -> void{
                 std::cout << "You have created a database named : " << db->getName() << std::endl;
                 return;
             }
+            if (tokens.at(0) == "DROP" && tokens.at(1)=="DATABASE" && tokens.size() == 2) {
+                if (db != nullptr) {
+                    db->cleanTables();
+                    std::cout << "Your database has been deleted." << std::endl;
+                    delete db;
+                }
+                db = nullptr;
+                return;
+            }
 
             if (it != GalaxyKeywords.end() && db != nullptr) {
                 it->second(db,std::vector(tokens.begin()+1,tokens.end()));
@@ -29,8 +38,9 @@ auto InterpreterQuery::getTokens(std::string element)->std::vector<std::string>{
             std::ranges::transform(element,element.begin(),::toupper);
             auto tokens = std::vector<std::string>();
 
-            const std::regex pattern(R"(\(([^)]*)\))");
+            const std::regex pattern(R"(\(([^)]*)\)(?:\s*\(([^)]*)\))?)");
             std::smatch match;
+
             if ( std::regex_search(element,match,pattern) ) {
                 auto query = std::regex_replace(element,pattern," ");
                 for (const auto& subrange : std::ranges::split_view(query, ' ')) {
@@ -39,7 +49,9 @@ auto InterpreterQuery::getTokens(std::string element)->std::vector<std::string>{
                         tokens.push_back(std::string(sv));
                     }
                 }
-                tokens.push_back(match[1]);
+                for (int i = 1; i < match.size(); i++) {
+                    tokens.push_back(match[i]);
+                }
             }else {
                 for (const auto& subrange : std::ranges::split_view(element, ' ')) {
                     std::string_view const sv(subrange.begin(),subrange.end());
@@ -48,6 +60,7 @@ auto InterpreterQuery::getTokens(std::string element)->std::vector<std::string>{
                     }
                 }
             }
+
             for (auto const& token : tokens ) {
                 std::cout << token << std::endl;
             }
