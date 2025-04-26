@@ -7,7 +7,7 @@
 
 auto InterpreterQuery::processQuery(Db*& db,std::string input) -> void{
             auto tokens = getTokens(input); // tokens.front must match one of {"SELECT", "INSERT", "UPDATE", "DELETE", "CREATE", "ALTER", "DROP"}
-            auto it = GalaxyKeywords.find(tokens.at(0));
+            const auto it = GalaxyKeywords.find(tokens.at(0));
             if (tokens.at(0) == "CREATE" && tokens.at(1)=="DATABASE" && db == nullptr) {
                 if (tokens.size() != 3 ) {
                     throw;
@@ -38,7 +38,7 @@ auto InterpreterQuery::getTokens(std::string element)->std::vector<std::string>{
             std::ranges::transform(element,element.begin(),::toupper);
             auto tokens = std::vector<std::string>();
 
-            const std::regex pattern(R"(\(([^)]*)\)(?:\s*\(([^)]*)\))?)");
+            const std::regex pattern(R"(\(([^)]*)\))");
             std::smatch match;
 
             if ( std::regex_search(element,match,pattern) ) {
@@ -49,9 +49,7 @@ auto InterpreterQuery::getTokens(std::string element)->std::vector<std::string>{
                         tokens.push_back(std::string(sv));
                     }
                 }
-                for (int i = 1; i < match.size(); i++) {
-                    tokens.push_back(match[i]);
-                }
+                tokens.push_back(match[1]);
             }else {
                 for (const auto& subrange : std::ranges::split_view(element, ' ')) {
                     std::string_view const sv(subrange.begin(),subrange.end());

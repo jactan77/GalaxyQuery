@@ -15,6 +15,7 @@
 class  Db {
         std::string name;
         std::vector<Table*> tables;
+
     public:
         explicit Db(std::string const& name);
         explicit Db();
@@ -22,6 +23,7 @@ class  Db {
         auto setTable(Table* t)->void;
         auto getName()->std::string;
         auto cleanTables()->void;
+        static auto getDataType(std::string const& value)->std::string;
 
         auto processCreate(std::vector<std::string> const&createQuery)-> void;
         auto processInsert(std::vector<std::string> const&insertQuery)-> void;
@@ -30,6 +32,7 @@ class  Db {
         auto processSelect(std::vector<std::string> const& selectQuery)-> void;
         auto processAlter(std::vector<std::string>  const& alterQuery)-> void;
         auto processDrop(std::vector<std::string>   const& dropQuery)-> void;
+
         static inline auto dataTypes = std::vector<std::string>{
             "INT","STRING", "CHAR", "BOOL"
 };
