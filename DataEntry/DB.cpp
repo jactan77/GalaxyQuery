@@ -2,7 +2,7 @@
 
 #include "DB.h"
 
-#include <format>
+
 
 
 Db::Db(std::string const& name){
@@ -16,7 +16,7 @@ Db::Db() {
 auto Db::setTable(Table* const t) -> void {
     this->tables.push_back(t);
 }
-auto Db::getName() -> std::string {
+auto Db::getDbName() -> std::string {
     return this->name;
 }
 auto Db::cleanTables()  ->void {
@@ -25,12 +25,16 @@ auto Db::cleanTables()  ->void {
     }
     this->tables.clear();
 }
+auto Db::tableExists(std::string const& tableName)   {
+    return std::ranges::find_if(this->tables,[&](const Table* t)-> bool{
+          return t->name == tableName;
+      });
+}
 
 
 
 auto Db::processCreate(std::vector<std::string> const& createQuery)-> void {
     if (createQuery.at(0) == "TABLE") {
-        std::cout << createQuery.at(0) << std::endl;
         if (createQuery.size() != 3) {
         throw;
       }
@@ -69,9 +73,7 @@ auto Db::processCreate(std::vector<std::string> const& createQuery)-> void {
 auto Db::processInsert(std::vector<std::string> const& insertQuery)-> void {
         if (insertQuery.size() == 3 && insertQuery.at(0) == "INTO") {
             auto const& getName = insertQuery.at(1);
-            auto const it = std::ranges::find_if(this->tables,[&](const Table* t)-> bool{
-                    return t->name == getName;
-            });
+            auto const it = this->tableExists(getName);
             if (it != this->tables.end()) {
                 auto row = std::vector<std::string>();
                 auto parseData = insertQuery.at(2) | std::views::split(',');
@@ -101,14 +103,12 @@ auto Db::processInsert(std::vector<std::string> const& insertQuery)-> void {
         }
 }
 auto Db::processUpdate(std::vector<std::string> const& updateQuery)-> void {
-  //////////////
+
 }
  auto Db::processDelete(std::vector<std::string> const& deleteQuery)-> void {
         if (deleteQuery.at(0) == "FROM" && deleteQuery.size() == 2 ) {
             auto const& getName = deleteQuery.at(1);
-            auto const it = std::ranges::find_if(this->tables,[&](const Table* t)-> bool{
-                    return t->name == getName;
-                });
+            auto const it = this->tableExists(getName);
             if (it != this->tables.end()) {
                 (*it)->rows.clear();
                 std::cout << std::format("All rows from the table {} have been deleted.", (*it)->name) << std::endl;
@@ -120,17 +120,44 @@ auto Db::processUpdate(std::vector<std::string> const& updateQuery)-> void {
 
 }
 auto Db::processSelect(std::vector<std::string> const& selectQuery)-> void{
-  ///////////
+                        /* ex
+                    ---------------------------------------
+                    | ID         | Name        | Age      |
+                    |------------|-------------|----------|
+                    | 1          | Alice       | 25       |
+                    | 2          | Bob         | 30       |
+                    | 3          | Charlie     | 35       |
+                    |------------|-------------|----------|
+                        */
 }
 auto Db::processAlter(std::vector<std::string> const& alterQuery)-> void{
-  ///////////
+    if ((alterQuery.size() == 5 || alterQuery.size() == 7) && alterQuery.at(0) == "TABLE") {
+        auto const& getName = alterQuery.at(1);
+        auto it = this->tableExists(getName);
+        if (it != this->tables.end()) {
+            auto* getTable = *it;
+            if (alterQuery.at(2) == "ADD") {
+                auto const& columnName = alterQuery.at(3);
+                auto const& dataType = alterQuery.at(4);
+                getTable->addColumn(columnName,dataType);
+                std::cout << std::format("The column has been successfully added with the name {}.",columnName)<< std::endl;
+                return;
+            }
+            if (alterQuery.at(2) == "RENAME" && alterQuery.at(3) == "COLUMN") {
+                auto const& oldName = alterQuery.at(4);
+                auto const& newName = alterQuery.at(6);
+                getTable->renameColumn(oldName,newName);
+                std::cout << std::format("The column has been successfully renamed to {}.",newName) << std::endl;
+                return;
+            }
+        }
+        throw std::runtime_error(std::format("No table with the name {} was found.",getName));
+    }
 }
 auto Db::processDrop(std::vector<std::string> const& dropQuery)-> void {
     if (dropQuery.at(0) == "TABLE" && dropQuery.size() == 2) {
         auto const& getName = dropQuery.at(1);
-        auto const it = std::ranges::find_if(this->tables,[&](const Table* t)-> bool{
-            return t->name == getName;
-        });
+        auto const& it = this->tableExists(getName);
         if (it != this->tables.end()) {
             delete *it;
             this->tables.erase(it);

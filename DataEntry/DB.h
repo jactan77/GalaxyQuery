@@ -8,6 +8,8 @@
 #include <iostream>
 #include <algorithm>
 #include <ranges>
+#include <format>
+
 #include <vector>
 #include <regex>
 #include "Table.h"
@@ -21,9 +23,13 @@ class  Db {
         explicit Db();
 
         auto setTable(Table* t)->void;
-        auto getName()->std::string;
+        auto getDbName()->std::string;
         auto cleanTables()->void;
+
+        auto tableExists(std::string const &tableName);
+
         static auto getDataType(std::string const& value)->std::string;
+
 
         auto processCreate(std::vector<std::string> const&createQuery)-> void;
         auto processInsert(std::vector<std::string> const&insertQuery)-> void;

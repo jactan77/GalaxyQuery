@@ -5,7 +5,7 @@
 
 
 
-auto InterpreterQuery::processQuery(Db*& db,std::string input) -> void{
+auto InterpreterQuery::processQuery(Db*& db,std::string const& input) -> void{
             auto tokens = getTokens(input); // tokens.front must match one of {"SELECT", "INSERT", "UPDATE", "DELETE", "CREATE", "ALTER", "DROP"}
             const auto it = GalaxyKeywords.find(tokens.at(0));
             if (tokens.at(0) == "CREATE" && tokens.at(1)=="DATABASE" && db == nullptr) {
@@ -14,7 +14,7 @@ auto InterpreterQuery::processQuery(Db*& db,std::string input) -> void{
                 }
                 delete db;
                 db = new Db(std::string(tokens.at(2)));
-                std::cout << "You have created a database named : " << db->getName() << std::endl;
+                std::cout << "You have created a database named : " << db->getDbName() << std::endl;
                 return;
             }
             if (tokens.at(0) == "DROP" && tokens.at(1)=="DATABASE" && tokens.size() == 2) {
