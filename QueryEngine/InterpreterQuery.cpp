@@ -34,31 +34,23 @@ auto InterpreterQuery::processQuery(Db*& db,std::string const& input) -> void{
             }
 }
 
-auto InterpreterQuery::getTokens(std::string element)->std::vector<std::string>{
-            std::ranges::transform(element,element.begin(),::toupper);
-            auto tokens = std::vector<std::string>();
+auto InterpreterQuery::getTokens(std::string element)->std::vector<std::string> {
+    std::ranges::transform(element,element.begin(),::toupper);
+    auto tokens = std::vector<std::string>();
 
-            const std::regex pattern(R"(\(([^)]*)\))");
-            std::smatch match;
-
-            if ( std::regex_search(element,match,pattern) ) {
-                auto query = std::regex_replace(element,pattern," ");
-                for (const auto& subrange : std::ranges::split_view(query, ' ')) {
-                    std::string_view const sv(subrange.begin(),subrange.end());
-                    if (!sv.empty()) {
-                        tokens.push_back(std::string(sv));
-                    }
-                }
-                tokens.push_back(match[1]);
-            }else {
-                for (const auto& subrange : std::ranges::split_view(element, ' ')) {
-                    std::string_view const sv(subrange.begin(),subrange.end());
-                    if (!sv.empty()) {
-                        tokens.push_back(std::string(sv));
-                    }
-                }
-            }
-
+    const std::regex pattern(R"(\(([^)]*)\))");
+    const auto element_begin = std::sregex_iterator(element.begin(),element.end(),pattern);
+    const auto element_end = std::sregex_iterator();
+    auto query = std::regex_replace(element,pattern," ");
+    for (const auto& subrange : std::ranges::split_view(query, ' ')) {
+        std::string_view const sv(subrange.begin(),subrange.end());
+        if (!sv.empty()) {
+            tokens.push_back(std::string(sv));
+        }
+    }for (auto it = element_begin; it != element_end; ++it) {
+        auto& match = *it;
+        tokens.push_back(match[1]);
+    }
             for (auto const& token : tokens ) {
                 std::cout << token << std::endl;
             }

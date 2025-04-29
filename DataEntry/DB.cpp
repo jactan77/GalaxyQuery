@@ -103,7 +103,30 @@ auto Db::processInsert(std::vector<std::string> const& insertQuery)-> void {
         }
 }
 auto Db::processUpdate(std::vector<std::string> const& updateQuery)-> void {
+        if (updateQuery.size() > 1) {
+            auto const& getName = updateQuery.at(0);
+            auto const it = this->tableExists(getName);
+            if (it != this->tables.end() && updateQuery.at(1) == "SET") {
+                const std::regex getColumnPatter(R"((\w+)\s*=\s*(\w+))");
+                std::smatch matches;
+                auto* table = *it;
+                auto columnValues = std::vector<std::pair<std::string,std::string>>();
+                auto columnUpdates = updateQuery.back() | std::views::split(',');
+                for (auto const& segment: columnUpdates) {
+                    std::string columnValue(segment.begin(),segment.end());
+                    if (std::regex_search(columnValue,matches,getColumnPatter)) {
+                            auto const& columnName = matches[1];
+                            auto const& value = matches[2];
+                            std::cout << columnName << std::endl;
+                            std::cout << value << std::endl;
 
+
+
+                    }
+                }
+
+            }
+        }
 }
  auto Db::processDelete(std::vector<std::string> const& deleteQuery)-> void {
         if (deleteQuery.at(0) == "FROM" && deleteQuery.size() == 2 ) {
