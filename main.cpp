@@ -3,8 +3,8 @@
 #include <string>
 #include <string_view>
 #include <algorithm>
-#include "DataEntry/DB.h"
-#include "QueryEngine/InterpreterQuery.h"
+#include "DB.h"
+#include "InterpreterQuery.h"
 
 auto main()-> int {
     Db* db = nullptr;

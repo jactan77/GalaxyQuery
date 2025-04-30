@@ -4,39 +4,54 @@
 
 
 
-Table::Table(std::string const& name, std::map<int,std::pair<std::string, std::string>> const& columns){
-             this->name = name;
-             this->columns = columns;
-             this->rows = std::map<int, std::vector<std::string>>();
-}
+
 auto Table::isColumnExists(std::string const &name) {
-    return std::ranges::find_if(columns,[&](auto const& pair)->bool { // pair -> {id, {name, dataType}}
-       auto getColumn =  pair.second;
-       return getColumn.first == name;
+    return std::ranges::find_if(columns,[&](auto const& column)->bool {
+       return column->getName() == name;
     });
 }
 
 auto Table::addColumn(std::string const& columnName, std::string const& dataType) -> void {
-    const auto it =  isColumnExists(columnName);
-    if (it != this->columns.end()) {
-        throw std::runtime_error("Cannot add the column: The column name is already taken.");
+    if (isColumnExists(columnName) != this->columns.end()) {
+        throw std::runtime_error(std::format("Cannot add the {}: The column name is already taken.",columnName));
     }
-    int index = (this->columns.rbegin())->first;
-    std::cout << "Index: " << index << std::endl;
-    this->columns[++index] = {columnName,dataType};
-    std::cout << "Size: " << this->columns.size() << std::endl;
+    columns.push_back(new Column(columnName,dataType));
 }
 
 auto Table::renameColumn(std::string const& columnName,std::string const &newName) -> void {
     const auto it = isColumnExists(columnName);
     if (it != columns.end()) {
-        auto& getIndex = it->first;
-        auto&[name, dataType] = it->second;
-        name = newName;
-        this->columns[getIndex] = {name, dataType};
+            if (isColumnExists(newName) != columns.end()) {
+                throw std::runtime_error("Cannot rename the column: The column name is already taken.");
+            }
+        (*it)->setName(newName);
         return;
     }
     throw std::runtime_error(std::format("No column with the name {} was found.",columnName));
 
 }
+ auto Table::insertValues(std::map<std::string, std::string> const& values)->void { // The key represents the column name, and the value represents the value retrieved from the query.
+        for (auto const& [columnName,value]:values) {
+            auto getColumn = isColumnExists(columnName);
+            if (getColumn != columns.end()) {
+                (*getColumn)->insertValue(this->id,value);
+                continue;
+            }
+            throw std::runtime_error(std::format("No column with the name {} was found.",columnName));
+        }
+        ++id;
+}
 
+auto Table::clearRows() -> void {
+    for (auto& column: columns) {
+        column->eraseFieldValues();
+    }
+    std::cout << std::format("All rows from the table {} have been deleted.", this->name) << std::endl;
+}
+auto Table::setColumns(std::map<std::string,std::string> const& columnData)->std::vector<Column*> {
+    auto columns = std::vector<Column*>();
+    for (auto const& [columnName,dataType]:columnData) {
+        columns.push_back(new Column(columnName,dataType));
+    }
+    return columns;
+}
