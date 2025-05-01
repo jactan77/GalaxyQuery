@@ -8,13 +8,12 @@
 #include <format>
 #include <algorithm>
 #include <regex>
-#ifndef TABLE_H
-#define TABLE_H
+
 struct Table{
     std::string name;
     std::vector<Column*> columns; // Columns, each having its own field values.
     int id; // AUTO_INCREMENT as a PRIMARY_KEY
-    Table(std::string  name, std::map<std::string,std::string> const& columns):name(std::move(name)),columns(setColumns(columns)),id(1){};
+    Table(std::string  name, std::map<std::string,std::string> const& columns):name(std::move(name)),columns(setColumns(columns)),id(0){};
     ~Table()=default;
     auto addColumn(std::string const& columnName, std::string const& dataType) -> void;
     auto renameColumn(std::string const& columnName,std::string const& newName)->void;
@@ -30,4 +29,4 @@ private:
 
 
 
-#endif
+

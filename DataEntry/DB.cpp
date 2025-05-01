@@ -43,7 +43,7 @@ auto Db::processCreateTable(std::string const& tableName, std::map<std::string,s
 
 
 auto Db::processInsert(std::string const& tableName,std::map<std::string, std::string> const& values)-> void {
-    auto getTable = this->tableExists(tableName);
+    auto const& getTable = this->tableExists(tableName);
     if (getTable != tables.end()) {
         (*getTable)->insertValues(values);
         std::cout << std::format("INSERT operation completed. Record ID: {}.",(*getTable)->id);
@@ -78,7 +78,7 @@ auto Db::processUpdate(std::vector<std::string> const& updateQuery)-> void {
         }
 }
  auto Db::processDelete(std::string const& tableName)-> void {
-            auto const it = this->tableExists(tableName);
+            auto const& it = this->tableExists(tableName);
             if (it != this->tables.end()) {
                 (*it)->clearRows();
                 return;
@@ -97,24 +97,26 @@ auto Db::processSelect(std::vector<std::string> const& selectQuery)-> void{
                         */
 }
 auto Db::processAlterRename(std::string const& tableName,std::string const& columnName, std::string const& newColumnName)-> void{
-    auto getTable = this->tableExists(tableName);
-    if (getTable != tables.end()) {
+    auto const& getTable = this->tableExists(tableName);
+    if (getTable != this->tables.end()) {
         (*getTable)->renameColumn(columnName,newColumnName);
+        return;
     }
     throw std::runtime_error(std::format("No table with the name {} was found.",tableName));
 }
 auto Db::processAlterAdd(std::string const& tableName,std::string const& columnName,std::string const& dataType)-> void{
-    auto getTable = this->tableExists(tableName);
-    if (getTable != tables.end()) {
+    auto const& getTable = this->tableExists(tableName);
+    if (getTable != this->tables.end()) {
         (*getTable)->addColumn(columnName,dataType);
+        return;
     }
     throw std::runtime_error(std::format("No table with the name {} was found.",tableName));
 }
 auto Db::processTableDrop(std::string const& tableName)-> void {
-        auto const& it = this->tableExists(tableName);
-        if (it != this->tables.end()) {
-            delete *it;
-            this->tables.erase(it);
+        auto const& getTable = this->tableExists(tableName);
+        if (getTable != this->tables.end()) {
+            delete *getTable;
+            this->tables.erase(getTable);
             std::cout << "Our table named " << tableName <<" has been successfully deleted." << std::endl;
             return;
         }

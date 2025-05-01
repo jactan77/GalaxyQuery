@@ -21,7 +21,7 @@ public:
       auto getName() -> std::string;
       auto setName(std::string const& newName)->void;
       auto eraseFieldValues()->void;
-
+      auto findValue(std::string const& value) const;
 
 
 };

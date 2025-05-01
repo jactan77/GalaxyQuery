@@ -46,21 +46,27 @@ auto InterpreterQuery::tokenizeSelectQuery (Db*& db, const std::vector<std::stri
 
 }
 auto InterpreterQuery::tokenizeInsertQuery 	(Db*& db, const std::vector<std::string>& query) -> void {
-    if (query.size() == 5 && query.at(0) == "INTO" && query.at(3) == "VALUES") {
+    if (query.size() == 5 && query.at(0) == "INTO" && query.at(2) == "VALUES") {
 
             auto const& tableName = query.at(1);
-            auto parseColumns = query.at(2) | std::views::split(',');
+            auto parseColumns = query.at(3) | std::views::split(',');
             auto parseValues = query.at(4) |  std::views::split(',');
 
-            auto columns = std::vector<std::string>();
-            auto values = std::vector<std::string>();
+            auto columns = std::vector<std::string>(std::ranges::distance(parseColumns));
+            auto values = std::vector<std::string>(std::ranges::distance(parseValues));
             auto colAndVal = std::map<std::string,std::string>(); // column and value
 
-            std::ranges::transform(parseColumns,columns.begin(),[](auto const& segment){
-                return std::regex_replace(std::string(segment.begin(),segment.end()),std::regex("\\s+"),"");
+            std::ranges::transform(parseColumns,columns.begin(),[](auto const& segment)-> std::string{
+                std::string word(segment.begin(),segment.end());
+                word = std::regex_replace(word,std::regex("\\s+"),"");
+                std::cout << std::format("Word {}", word)<< std::endl;
+                return word;
             });
-            std::ranges::transform(parseValues,values.begin(),[](auto const& segment){
-                return std::regex_replace(std::string(segment.begin(),segment.end()),std::regex("\\s+"),"");
+            std::ranges::transform(parseValues,values.begin(),[](auto const& segment)->std::string{
+                std::string word(segment.begin(),segment.end());
+                word = std::regex_replace(word,std::regex("\\s+"),"");
+                std::cout << std::format("Value {}", word)<< std::endl;
+                return word;
             });
             if (columns.size() != values.size()) {
                 throw std::runtime_error("The number of columns does not match the number of values.");
@@ -70,9 +76,10 @@ auto InterpreterQuery::tokenizeInsertQuery 	(Db*& db, const std::vector<std::str
             }
             db->processInsert(tableName,colAndVal);
             std::cout << "The data has been successfully inserted." << std::endl;
-
+            return;
 
     }
+            throw std::runtime_error("Invalid operation");
 }
 auto InterpreterQuery::tokenizeUpdateQuery(Db*& db, const std::vector<std::string>& query) -> void {
 
@@ -103,6 +110,8 @@ auto InterpreterQuery::tokenizeCreateQuery(Db*& db, const std::vector<std::strin
                 std::cout <<"name: " << name << std::endl;
                 std::cout << "type: " << type << std::endl;
                 getColumns.insert({name,type});
+            } else {
+                throw std::runtime_error("Invalid operation");
             }
         }
         db->processCreateTable(tableName,getColumns);

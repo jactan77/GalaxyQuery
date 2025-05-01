@@ -11,6 +11,7 @@ auto Column::insertValue(int const& id,std::string const& value)->void {
                 throw std::runtime_error("Attempted to insert a row that conflicts with an existing entry. Duplicate entries are not allowed.");
             }
         fieldValues.insert({id, value});
+        return;
     }
                 throw std::runtime_error(std::format("The provided value {} is incompatible with the data type of the column {}.",value,this->name));
 
@@ -24,6 +25,11 @@ auto Column::getName() -> std::string {
 };
 auto Column::eraseFieldValues()->void {
     fieldValues.clear();
+};
+auto Column::findValue(std::string const& value) const {
+    return std::ranges::find_if(this->fieldValues,[value](auto const& pair)-> bool {
+        return value == pair.second;
+    });
 };
 
 auto Column::selectType(std::string const& value)->std::string {
