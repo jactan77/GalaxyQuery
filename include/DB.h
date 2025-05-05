@@ -30,7 +30,7 @@ public:
 
     auto processCreateTable(std::string const &tableName, std::map<std::string, std::string> const &columns) -> void;
     auto processInsert(std::string const& tableName,std::map<std::string, std::string> const& values)-> void;
-    auto processUpdate(std::vector<std::string> const&updateQuery)-> void;
+    auto processUpdate(std::string const& tableName, std::map<std::string,std::string> const& values, std::vector<std::string> const& conditions )-> void;
     auto processDelete(std::string const& tableName)-> void;
     auto processAlterRename(std::string const& tableName,std::string const& columnName, std::string const& newColumnName)-> void;
     auto processAlterAdd(std::string const& tableName,std::string const& columnName,std::string const& dataType)-> void;

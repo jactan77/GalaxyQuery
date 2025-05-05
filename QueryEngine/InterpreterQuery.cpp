@@ -82,7 +82,29 @@ auto InterpreterQuery::tokenizeInsertQuery 	(Db*& db, const std::vector<std::str
             throw std::runtime_error("Invalid operation");
 }
 auto InterpreterQuery::tokenizeUpdateQuery(Db*& db, const std::vector<std::string>& query) -> void {
+    if (query.size() == 5 && query.at(1) == "SIZE" && query.at(3) == "WHERE") {
+        auto const& tableName = query.at(0);
+        auto parseSetValues = query.at(2) | std::views::split(',');
+        std::map<std::string,std::string> setValues;
+        const std::regex columnValuePattern(R"(\S+\s*=\s*\S+)");
+        std::smatch matches;
+        for (auto const& segment:  parseSetValues) {
+            std::string val(segment.begin(),segment.end());
+            if (std::regex_search(val,matches,columnValuePattern)) {
+                std::string const& colunmName = matches[1];
+                std::string const& value = matches[2];
+                setValues.insert({colunmName,value});
+            }
+        }
+        auto parseCondition = query.at(4) | std::views::split(',');
+        auto getCondition = std::vector<std::string>(std::ranges::distance(parseCondition));
 
+        std::ranges::transform(parseCondition,getCondition.begin(),[](auto const& segment)-> std::string{
+            std::string word(segment.begin(),segment.end());
+            return word;
+        });
+        db->processUpdate(tableName,setValues,getCondition);
+    }
 }
 
 auto InterpreterQuery::tokenizeCreateQuery(Db*& db, const std::vector<std::string>& query) -> void {

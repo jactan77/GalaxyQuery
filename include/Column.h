@@ -15,13 +15,49 @@ class Column {
       std::string dataType;
       std::map<int,std::string> fieldValues; // key <=> id
       static auto selectType(std::string const& value )->std::string;
-      static auto Column::toInt(std::string const& value)->int;
+      static auto toInt(std::string const& value)->int;
 
       template<typename Comparator>
-      [[nodiscard]] auto FilterByColumn(const Column& other,Comparator compare) const -> std::vector<int>;
+      [[nodiscard]] auto FilterByColumn(const Column& other,Comparator compare) const -> std::vector<int> {
+            if (this->dataType != other.dataType) {
+                  throw std::runtime_error("You are attempting to compare columns with incompatible data types");
+            }
+            auto filteredIds = std::vector<int>();
+
+            for (auto id = 1; id <= other.fieldValues.size(); id++ ) {
+                  if (this->dataType == "INT" || this->dataType == "BOOL") {
+                        if (compare(toInt(this->fieldValues.at(id)),toInt(other.fieldValues.at(id)))) {
+                              filteredIds.push_back(id);
+                        }
+                  } else {
+                        if (compare(this->fieldValues.at(id),other.fieldValues.at(id))) {
+                              filteredIds.push_back(id);
+                        }
+                  }
+            }
+            return filteredIds;
+
+      };
 
       template<typename Comparator>
-      [[nodiscard]] auto FilterByValue(std::string const& value, Comparator compare) const -> std::vector<int>;
+      [[nodiscard]] auto FilterByValue(std::string const& value, Comparator compare) const -> std::vector<int> {
+            if (this->dataType != selectType(value)) {
+                  throw std::runtime_error("You are attempting to compare columns with incompatible data types");
+            }
+            auto filteredIds = std::vector<int>();
+            for (auto const& [id,rowValue] : this->fieldValues) {
+                  if (this->dataType == "INT" || this->dataType == "BOOL") {
+                        if (compare(toInt(value),toInt(rowValue))) {
+                              filteredIds.push_back(id);
+                        }
+                  }else {
+                        if (compare(value,rowValue)){
+                              filteredIds.push_back(id);
+                        }
+                  }
+            }
+            return  filteredIds;
+      };
 
 
       auto operator==(const Column& other ) const ->std::vector<int> {
