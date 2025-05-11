@@ -52,6 +52,12 @@ auto Db::processInsert(std::string const& tableName,std::map<std::string, std::s
     throw std::runtime_error(std::format("No table with the name {} was found.",tableName));
 }
 auto Db::processUpdate(std::string const& tableName, std::map<std::string,std::string> const& values, std::vector<std::string> const& conditions )-> void {
+    auto const& getTable = this->tableExists(tableName);
+    if (getTable != tables.end()) {
+        (*getTable)->updateValues(values,conditions);
+        return;
+    }
+    throw std::runtime_error(std::format("No table with the name {} was found.",tableName));
 
 }
  auto Db::processDelete(std::string const& tableName)-> void {
@@ -62,7 +68,7 @@ auto Db::processUpdate(std::string const& tableName, std::map<std::string,std::s
             }
             throw std::runtime_error(std::format("No table with the name {} was found.",tableName));
 }
-auto Db::processSelect(std::vector<std::string> const& selectQuery)-> void{
+auto Db::processSelect(std::string const& tableName,std::vector<std::string> const& columns)-> void{
                         /* ex
                     ---------------------------------------
                     | ID         | Name        | Age      |
@@ -72,7 +78,22 @@ auto Db::processSelect(std::vector<std::string> const& selectQuery)-> void{
                     | 3          | Charlie     | 35       |
                     |------------|-------------|----------|
                         */
+        auto const& getTable = this->tableExists(tableName);
+        if (getTable != this->tables.end()) {
+            (*getTable)->printColumns(columns);
+            return;
+        }
+        throw std::runtime_error(std::format("No table with the name {} was found.",tableName));
 }
+auto Db::processSelect(std::string const& tableName,std::vector<std::string> const& columns,std::vector<std::string> const& conditions)-> void {
+    auto const& getTable = this->tableExists(tableName);
+    if (getTable != this->tables.end()) {
+        (*getTable)->printFilteredColumns(columns,conditions);
+        return;
+    }
+    throw std::runtime_error(std::format("No table with the name {} was found.",tableName));
+}
+
 auto Db::processAlterRename(std::string const& tableName,std::string const& columnName, std::string const& newColumnName)-> void{
     auto const& getTable = this->tableExists(tableName);
     if (getTable != this->tables.end()) {

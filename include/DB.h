@@ -34,9 +34,10 @@ public:
     auto processDelete(std::string const& tableName)-> void;
     auto processAlterRename(std::string const& tableName,std::string const& columnName, std::string const& newColumnName)-> void;
     auto processAlterAdd(std::string const& tableName,std::string const& columnName,std::string const& dataType)-> void;
-    auto processSelect(std::vector<std::string> const& selectQuery)-> void;
-    auto processTableDrop(std::string const& tableName)-> void;
+    auto processSelect(std::string const& tableName,std::vector<std::string> const& columns)-> void;
+    auto processSelect(std::string const& tableName,std::vector<std::string> const& columns,std::vector<std::string> const& conditions)-> void;
 
+    auto processTableDrop(std::string const& tableName)-> void;
 
 
 

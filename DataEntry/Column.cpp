@@ -35,6 +35,90 @@ auto Column::findValue(std::string const& value) const {
         return value == pair.second;
     });
 };
+auto Column::getFilteredRows(std::string const& value,std::string const& operand) const-> std::vector<int> {
+    switch (operand[0]) {
+        case '=': {
+            return *this == value;
+        }
+        case '>':
+            return *this > value;
+        case '<':
+            return *this < value;
+        default:
+            throw std::runtime_error("An invalid operator was used in the query");
+    }
+
+}
+auto Column::updateValue(int const& id, std::string const& newValue) -> void {
+    if (selectType(newValue) != this->dataType) {
+        throw std::runtime_error(std::format("The provided value {} is incompatible with the data type of the column {}.",newValue,this->name));
+    }
+    this->fieldValues[id] = newValue;
+}
+auto Column::printHeader(const size_t width)-> std::string {
+    std::stringstream header;
+    header << "| " << this->getName();
+    for (size_t i = this->getName().size(); i < width - 2; i++) {
+        header << " ";
+    }
+    header << " |" << std::endl;
+    return header.str();
+}
+
+auto Column::printRow(std::string const& value, const size_t width)-> std::string{
+    std::stringstream row;
+    row << "| " << value;
+    for (size_t i = value.length(); i < width - 2; i++) {
+        row << " ";
+    }
+    row << " |" << std::endl;
+    return row.str();
+}
+
+auto Column::calculateWidth() const -> size_t {
+    size_t width = this->name.size();
+    for (auto const& [id, value]: this->fieldValues) {
+        width = std::max(width, value.size());
+    }
+    width += 4;
+    return width;
+}
+
+auto Column::printAllRows()  -> std::string {
+    std::stringstream result;
+    size_t width = calculateWidth();
+    const std::string line = "+" + std::string(width - 2, '-') + "+";
+
+    result << line << std::endl;
+    result << printHeader(width) << std::endl;
+    result << line << std::endl;
+
+    for (auto const& [id, value]: this->fieldValues) {
+        result << printRow(value, width) << std::endl;
+    }
+
+    result << line << std::endl;
+
+    return result.str();
+}
+
+auto Column::printFilteredRows(std::vector<int> const& ids) ->void {
+    const size_t width = calculateWidth();
+    const std::string line = "+" + std::string(width - 2, '-') + "+";
+
+    std::cout << line << std::endl;
+    this->printHeader(width);
+    std::cout << line << std::endl;
+
+    for (int id: ids) {
+        auto it = this->fieldValues.find(id);
+        if (it != this->fieldValues.end()) {
+            printRow(it->second, width);
+        }
+    }
+
+    std::cout << line << std::endl;
+}
 
 auto Column::selectType(std::string const& value)->std::string {
     auto isInt = [](std::string const& str)-> bool {
