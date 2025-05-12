@@ -107,6 +107,7 @@ auto InterpreterQuery::tokenizeUpdateQuery(Db*& db, const std::vector<std::strin
         const auto getConditions = tokenizeConditions(query.at(4));
 
         db->processUpdate(tableName,setValues,getConditions);
+        return;
     }
     throw std::runtime_error("Invalid operation");
 

@@ -58,20 +58,21 @@ auto Column::updateValue(int const& id, std::string const& newValue) -> void {
 auto Column::printHeader(const size_t width)-> std::string {
     std::stringstream header;
     header << "| " << this->getName();
-    for (size_t i = this->getName().size(); i < width - 2; i++) {
+    for (size_t i = this->getName().size(); i < width; i++) {
         header << " ";
     }
-    header << " |" << std::endl;
+    header << " |" << '\n';
     return header.str();
 }
 
 auto Column::printRow(std::string const& value, const size_t width)-> std::string{
     std::stringstream row;
     row << "| " << value;
-    for (size_t i = value.length(); i < width - 2; i++) {
+    for (size_t i = value.size(); i < width+1; i++) {
         row << " ";
     }
-    row << " |" << std::endl;
+    row << "|\n";
+
     return row.str();
 }
 
@@ -80,21 +81,22 @@ auto Column::calculateWidth() const -> size_t {
     for (auto const& [id, value]: this->fieldValues) {
         width = std::max(width, value.size());
     }
-    width += 4;
     return width;
 }
 
-auto Column::printAllRows()  -> std::string {
+auto Column::printRows(const std::set<int>& ids)  -> std::string {
     std::stringstream result;
-    size_t width = calculateWidth();
-    const std::string line = "+" + std::string(width - 2, '-') + "+";
+    const size_t width = calculateWidth();
+    const std::string line = "+" + std::string(width + 2, '-') + "+";
 
     result << line << std::endl;
-    result << printHeader(width) << std::endl;
+    result << printHeader(width);
     result << line << std::endl;
 
     for (auto const& [id, value]: this->fieldValues) {
-        result << printRow(value, width) << std::endl;
+        if (ids.contains(id)) {
+            result << printRow(value, width);
+        }
     }
 
     result << line << std::endl;
@@ -102,23 +104,7 @@ auto Column::printAllRows()  -> std::string {
     return result.str();
 }
 
-auto Column::printFilteredRows(std::vector<int> const& ids) ->void {
-    const size_t width = calculateWidth();
-    const std::string line = "+" + std::string(width - 2, '-') + "+";
 
-    std::cout << line << std::endl;
-    this->printHeader(width);
-    std::cout << line << std::endl;
-
-    for (int id: ids) {
-        auto it = this->fieldValues.find(id);
-        if (it != this->fieldValues.end()) {
-            printRow(it->second, width);
-        }
-    }
-
-    std::cout << line << std::endl;
-}
 
 auto Column::selectType(std::string const& value)->std::string {
     auto isInt = [](std::string const& str)-> bool {

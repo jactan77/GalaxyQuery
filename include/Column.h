@@ -7,6 +7,7 @@
 #include <format>
 #include <utility>
 #include <vector>
+#include <set>
 #include <iostream>
 #include <sstream>
 class Column {
@@ -16,9 +17,8 @@ class Column {
       static auto selectType(std::string const& value )->std::string;
       static auto toInt(std::string const& value)->int;
       auto printHeader(size_t width)->std::string;
-      static auto printRow(std::string const& value,size_t width) -> std::string;
+      auto printRow(std::string const& value,size_t width) -> std::string;
 
-      auto calculateWidth() const -> size_t;
 
 
       template<typename Comparator>
@@ -59,13 +59,13 @@ public:
       ~Column() = default;
       [[nodiscard]] auto findValue(std::string const& value) const;
       [[nodiscard]] auto getFilteredRows(std::string const& value,std::string const& operand) const-> std::vector<int>;
-      auto insertValue(int const& id,std::string const& value)->void;
+      auto insertValue(int const &id, std::string const &value)->void;
       auto getName() -> std::string;
       auto setName(std::string const& newName)->void;
       auto eraseFieldValues()->void;
-      auto printAllRows()->std::string;
-      auto printFilteredRows(std::vector<int> const& ids)->void;
+      auto printRows(const std::set<int>& ids)->std::string;
       auto updateValue(int const& id, std::string const& newValue)->void;
+      auto calculateWidth() const -> size_t;
 
 };
 

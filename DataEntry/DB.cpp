@@ -46,7 +46,6 @@ auto Db::processInsert(std::string const& tableName,std::map<std::string, std::s
     auto const& getTable = this->tableExists(tableName);
     if (getTable != tables.end()) {
         (*getTable)->insertValues(values);
-        std::cout << std::format("INSERT operation completed. Record ID: {}.",(*getTable)->id);
         return;
     }
     throw std::runtime_error(std::format("No table with the name {} was found.",tableName));
@@ -80,7 +79,7 @@ auto Db::processSelect(std::string const& tableName,std::vector<std::string> con
                         */
         auto const& getTable = this->tableExists(tableName);
         if (getTable != this->tables.end()) {
-            (*getTable)->printColumns(columns);
+            (*getTable)->selectColumns(columns);
             return;
         }
         throw std::runtime_error(std::format("No table with the name {} was found.",tableName));
@@ -88,7 +87,7 @@ auto Db::processSelect(std::string const& tableName,std::vector<std::string> con
 auto Db::processSelect(std::string const& tableName,std::vector<std::string> const& columns,std::vector<std::string> const& conditions)-> void {
     auto const& getTable = this->tableExists(tableName);
     if (getTable != this->tables.end()) {
-        (*getTable)->printFilteredColumns(columns,conditions);
+        (*getTable)->selectFilteredColumns(columns,conditions);
         return;
     }
     throw std::runtime_error(std::format("No table with the name {} was found.",tableName));

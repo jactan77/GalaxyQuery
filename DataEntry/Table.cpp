@@ -1,7 +1,6 @@
 
 
 #include "Table.h"
-
 #include <random>
 
 
@@ -10,7 +9,9 @@ auto Table::isColumnExists(std::string const &name) {
        return column->getName() == name;
     });
 }
-
+auto Table::getID() const-> int {
+    return id;
+};
 auto Table::addColumn(std::string const& columnName, std::string const& dataType) -> void {
     if (isColumnExists(columnName) != this->columns.end()) {
         throw std::runtime_error(std::format("Cannot add the {}: The column name is already taken.",columnName));
@@ -46,80 +47,129 @@ auto Table::updateValues(std::map<std::string,std::string> const& values, std::v
         }
     std::cout << std::format("Updated {} rows in table {}", getMatchingRows.size(), this->name) << std::endl;
 }
-auto Table::processConditions(std::vector<std::string> const& conditions) -> std::vector<int> {
-    std::vector<int> matchingRows;
+auto Table::processConditions(std::vector<std::string> const& conditions) -> std::set<int> {
+    std::set<int> matchingRows;
     bool isFirstCondition = true;
-
-
+    std::string logicalOp = "AND";
     int i = 0;
     while (i < conditions.size()) {
         auto const& columnName = conditions[i++];
         auto const& operand  = conditions[i++];
         auto const& value = conditions[i++];
 
-        std::string logicalOp = "AND";
         if (i < conditions.size()) {
             logicalOp = conditions[i++];
         }
         auto findColumn  = isColumnExists(columnName);
         if (findColumn == columns.end()) {
             throw std::runtime_error(std::format("No column with the name {} was found.",columnName));
-
         }
         std::vector<int> currentRows = (*findColumn)->getFilteredRows(value,operand);
         if (isFirstCondition) {
-            matchingRows = currentRows;
+            matchingRows = std::set(currentRows.begin(),currentRows.end());
             isFirstCondition = false;
         } else {
             if (logicalOp == "AND") {
-                std::vector<int> uniqueRows;
+                std::set<int> uniqueRows;
                 for (int id: matchingRows) {
-                    if (std::ranges::find(currentRows.begin(),currentRows.end(),id) != currentRows.end()) {
-                        uniqueRows.push_back(id);
+                    if (matchingRows.contains(id)) {
+                        uniqueRows.insert(id);
                     }
                 }
                 matchingRows = uniqueRows;
             }
-            else if (logicalOp == "OR") {
-                for (int id: currentRows) {
-                    if (std::ranges::find(matchingRows.begin(),matchingRows.end(),id) == matchingRows.end()) {
-                        matchingRows.push_back(id);
-                    }
-                }
+            if (logicalOp == "OR") {
+                matchingRows.insert(currentRows.begin(), currentRows.end());
             }
         }
     }
     return matchingRows;
 }
-auto Table::printColumns(std::vector<std::string> const& columns)-> void {
-    if (columns.size() == 1 && columns.at(0) == "*") {
-        for (Column *& column: this->columns) {
-            std::cout << column->printAllRows() << "\t";
+auto Table::printTable(std::vector<Column*> const& columnsToPrint,std::set<int> const& ids)-> std::string {
+    std::stringstream result;
+    std::vector<std::vector<std::string>> columnLines;
+    std::vector<size_t> columnWidths;
+    // get lines and width of each column
+    for (const auto& column : columnsToPrint) {
+        std::stringstream colStream(column->printRows(ids));
+        std::vector<std::string> lines;
+        std::string line;
+
+        while (std::getline(colStream, line)) {
+            lines.push_back(line);
         }
-    } else {
-        for (auto const& columnName: columns) {
-            auto getColumn = isColumnExists(columnName);
-            if (getColumn != this->columns.end()) {
-                std::cout << (*getColumn)->printAllRows() << "\t";
-                continue;
+
+        columnLines.push_back(lines);
+        columnWidths.push_back(column->calculateWidth());
+    }
+
+    // calculate the maximum number of rows
+    size_t maxRows = 0;
+    for (const auto& lines : columnLines) {
+        maxRows = std::max(maxRows, lines.size());
+    }
+
+    // print table with merged columns
+    for (size_t rowIndex = 0; rowIndex < maxRows; ++rowIndex) {
+        for (size_t colIndex = 0; colIndex < columnLines.size(); ++colIndex) {
+            const auto& lines = columnLines[colIndex];
+            result << lines[rowIndex];
+            if (colIndex < columnLines.size() - 1) {
+                result << " ";
             }
-            throw std::runtime_error(std::format("No column with the name {} was found.",columnName));
+        }
+        result << "\n";
+    }
+    return result.str();
+}
+auto Table::selectColumns(std::vector<std::string> const& selectedColumns) -> void {
+    std::vector<Column*> columnsToPrint;
+    if (selectedColumns.size() == 1 && selectedColumns[0] == "*") {
+        columnsToPrint = this->columns;
+    } else {
+        for (const auto& columnName : selectedColumns) {
+            auto columnIt = isColumnExists(columnName);
+            if (columnIt == this->columns.end()) {
+                throw std::runtime_error(std::format("No column with the name {} was found.", columnName));
+            }
+            columnsToPrint.push_back(*columnIt);
         }
     }
+    std::set<int> allIds;
+    for (int i = 1; i <= this->id; ++i) {
+        allIds.insert(i);
+    }
+    std::cout << printTable(columnsToPrint,allIds) << std::endl;
 }
-auto Table::printFilteredColumns(std::vector<std::string> const& columns, std::vector<std::string> const& conditions) -> void {
+
+auto Table::selectFilteredColumns(std::vector<std::string> const& selectedColumns, std::vector<std::string> const& conditions) -> void {
+    std::vector<Column*> columnsToPrint;
+    if (selectedColumns.size() == 1 && selectedColumns[0] == "*") {
+        columnsToPrint = this->columns;
+    } else {
+        for (const auto& columnName : selectedColumns) {
+            auto columnIt = isColumnExists(columnName);
+            if (columnIt == this->columns.end()) {
+                throw std::runtime_error(std::format("No column with the name {} was found.", columnName));
+            }
+            columnsToPrint.push_back(*columnIt);
+        }
+    }
+    const std::set<int> getFilteredIds = this->processConditions(conditions);
+    std::cout << printTable(columnsToPrint,getFilteredIds);
 
 }
  auto Table::insertValues(std::map<std::string, std::string> const& values)->void { // The key represents the column name, and the value represents the value retrieved from the query.
+        int const getID = this->id;
         for (auto const& [columnName,value]:values) {
-            auto getColumn = isColumnExists(columnName);
+            auto  getColumn = isColumnExists(columnName);
             if (getColumn != columns.end()) {
-                (*getColumn)->insertValue(this->id,value);
+                (*getColumn)->insertValue(getID,value);
                 continue;
             }
             throw std::runtime_error(std::format("No column with the name {} was found.",columnName));
         }
-        ++id;
+        std::cout << std::format("INSERT operation completed. Record ID: {}.",this->id++);
 }
 
 auto Table::clearRows() -> void {
