@@ -34,6 +34,7 @@ public:
     auto processDelete(std::string const& tableName)-> void;
     auto processAlterRename(std::string const& tableName,std::string const& columnName, std::string const& newColumnName)-> void;
     auto processAlterAdd(std::string const& tableName,std::string const& columnName,std::string const& dataType)-> void;
+    auto processAlterDelete(std::string const& tableName,std::string const& columnName)->void;
     auto processSelect(std::string const& tableName,std::vector<std::string> const& columns)-> void;
     auto processSelect(std::string const& tableName,std::vector<std::string> const& columns,std::vector<std::string> const& conditions)-> void;
 

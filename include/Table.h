@@ -10,7 +10,7 @@
 #include <set>
 #include <regex>
 
-struct Table{
+struct Table {
     std::string name;
     std::vector<Column*> columns; // Columns, each having its own field values.
     Table(std::string  name, std::map<std::string,std::string> const& columns):name(std::move(name)),columns(setColumns(columns)),id(1){};
@@ -19,6 +19,7 @@ struct Table{
     auto addColumn(std::string const& columnName, std::string const& dataType) -> void;
     auto renameColumn(std::string const& columnName,std::string const& newName)->void;
     auto updateValues(std::map<std::string,std::string> const& values, std::vector<std::string> const& conditions)->void;
+    auto dropColumn(std::string const& columnName)->void;
     auto insertValues(std::map<std::string, std::string> const& values)->void; // The key represents the column name, and the value represents the value retrieved from the query.
     auto clearRows() -> void;
     auto selectColumns(std::vector<std::string> const& selectedColumns)-> void; // select without where

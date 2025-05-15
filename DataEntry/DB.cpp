@@ -35,8 +35,12 @@ auto Db::tableExists(std::string const& tableName)   {
 
 
 auto Db::processCreateTable(std::string const& tableName, std::map<std::string,std::string> const& columns)-> void {
-        this->setTable(new Table(tableName,columns));
-        std::cout << "You have created in DB: " << this->name << " a table named : " << tableName<< std::endl;
+        if (tableExists(tableName) == this->tables.end()) {
+                this->setTable(new Table(tableName,columns));
+                std::cout << "You have created in DB: " << this->name << " a table named : " << tableName<< std::endl;
+                return;
+        }
+        throw std::runtime_error(std::format("Cannot add a table named {}: That name is already taken.",tableName));
 }
 
 
@@ -105,6 +109,14 @@ auto Db::processAlterAdd(std::string const& tableName,std::string const& columnN
     auto const& getTable = this->tableExists(tableName);
     if (getTable != this->tables.end()) {
         (*getTable)->addColumn(columnName,dataType);
+        return;
+    }
+    throw std::runtime_error(std::format("No table with the name {} was found.",tableName));
+}
+auto Db::processAlterDelete(std::string const& tableName,std::string const& columnName) -> void {
+    auto const& getTable = this->tableExists(tableName);
+    if (getTable != this->tables.end()) {
+        (*getTable)->dropColumn(columnName);
         return;
     }
     throw std::runtime_error(std::format("No table with the name {} was found.",tableName));

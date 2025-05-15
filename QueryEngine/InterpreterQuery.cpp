@@ -114,7 +114,7 @@ auto InterpreterQuery::tokenizeUpdateQuery(Db*& db, const std::vector<std::strin
 }
 auto InterpreterQuery::tokenizeConditions(std::string const& parseCondition) -> std::vector<std::string> {
     auto getCondition = std::vector<std::string>();
-    const std::regex conditionPattern(R"((\w+)\s*([\=\>\<]\=?)\s*(\w+)(?:\s+(AND|OR)\s+)?)");
+    const std::regex conditionPattern(R"((\w+)\s*([\=\>\<\!=]\=?)\s*(\w+)(?:\s+(AND|OR)\s+)?)");
     const auto it_begin=std::sregex_iterator(parseCondition.begin(),parseCondition.end(),conditionPattern);
     const auto it_end = std::sregex_iterator();
     for (auto it=it_begin; it != it_end; ++it) {
@@ -157,16 +157,16 @@ auto InterpreterQuery::tokenizeCreateQuery(Db*& db, const std::vector<std::strin
             if (std::regex_search(column, matches, columnPattern)) {
 
                 auto const name = std::string(matches[1]);
-                auto const type = std::string(matches[2]);
+                auto const datatype = std::string(matches[2]);
 
-                if (std::ranges::find(dataTypes, type) == dataTypes.end()) {
-                    std::cout << "Error: Invalid data type '" << type << "'" << std::endl;
-                    throw std::runtime_error("Invalid data type: " + type);
+                if (std::ranges::find(dataTypes, datatype) == dataTypes.end()) {
+                    std::cout << "Error: Invalid data type '" << datatype << "'" << std::endl;
+                    throw std::runtime_error("Invalid data type: " + datatype);
                 }
 
                 std::cout <<"name: " << name << std::endl;
-                std::cout << "type: " << type << std::endl;
-                getColumns.insert({name,type});
+                std::cout << "type: " << datatype << std::endl;
+                getColumns.insert({name,datatype});
             } else {
                 throw std::runtime_error("Invalid operation");
             }
@@ -198,6 +198,10 @@ auto InterpreterQuery::tokenizeAlterQuery (Db*& db, const std::vector<std::strin
         if (query.at(2) == "ADD") {
             auto const& columnName = query.at(3);
             auto const& dataType = query.at(4);
+            if (std::ranges::find(dataTypes, dataType) == dataTypes.end()) {
+                std::cout << "Error: Invalid data type '" << dataType << "'" << std::endl;
+                throw std::runtime_error("Invalid data type: " + dataType);
+            }
             db->processAlterAdd(tableName,columnName,dataType);
             std::cout << std::format("The column has been successfully added with the name {}.",columnName)<< std::endl;
             return;
@@ -209,6 +213,12 @@ auto InterpreterQuery::tokenizeAlterQuery (Db*& db, const std::vector<std::strin
             std::cout << std::format("The column has been successfully renamed to {}.",newColumnName) << std::endl;
             return;
         }
+       if (query.at(2)=="DROP" && query.at(3)=="COLUMN") {
+           auto const& columnName = query.at(4);
+           db->processAlterDelete(tableName,columnName);
+           std::cout << std::format("The column {} has been successfully deleted.",columnName) << std::endl;
+           return;
+       }
     }
     throw std::runtime_error("Invalid operation");
 

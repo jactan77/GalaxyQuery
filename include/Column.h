@@ -8,19 +8,25 @@
 #include <utility>
 #include <vector>
 #include <set>
+#include <algorithm>
+#include <ranges>
 #include <iostream>
 #include <sstream>
 class Column {
       std::string name;
       std::string dataType;
       std::map<int,std::string> fieldValues; // key <=> id
+
       static auto selectType(std::string const& value )->std::string;
       static auto toInt(std::string const& value)->int;
       auto printHeader(size_t width)->std::string;
-      auto printRow(std::string const& value,size_t width) -> std::string;
-
-
-
+      static auto printRow(std::string const& value,size_t width) -> std::string;
+      static inline auto defaultValues = std::map<std::string,std::string>{
+            {"INT","0"},
+            {"STRING","EMPTY"},
+            {"CHAR","N"},
+            {"BOOL","TRUE"}
+      };
       template<typename Comparator>
       [[nodiscard]] auto FilterByValue(std::string const& value, Comparator compare) const -> std::vector<int> {
             if (this->dataType != selectType(value)) {
@@ -52,14 +58,17 @@ class Column {
       auto operator<(const std::string& value) const -> std::vector<int> {
             return FilterByValue(value,[](const auto& val1, const auto& val2)->bool{return val1 < val2;});
       }
-
+      auto operator!=(const std::string& value) const -> std::vector<int> {
+            return FilterByValue(value,[](const auto& val1, const auto& val2)->bool{return val1 != val2;});
+      }
 
 public:
-      Column(std::string  name, std::string  dataType):name(std::move(name)),dataType(std::move(dataType)) {};
+      Column(std::string  name, std::string dataType):name(std::move(name)),dataType(std::move(dataType)) {};
       ~Column() = default;
       [[nodiscard]] auto findValue(std::string const& value) const;
       [[nodiscard]] auto getFilteredRows(std::string const& value,std::string const& operand) const-> std::vector<int>;
       auto insertValue(int const &id, std::string const &value)->void;
+      auto insertDefaultValues(int ids)->void;
       auto getName() -> std::string;
       auto setName(std::string const& newName)->void;
       auto eraseFieldValues()->void;

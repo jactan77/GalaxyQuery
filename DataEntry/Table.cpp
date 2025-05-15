@@ -16,7 +16,11 @@ auto Table::addColumn(std::string const& columnName, std::string const& dataType
     if (isColumnExists(columnName) != this->columns.end()) {
         throw std::runtime_error(std::format("Cannot add the {}: The column name is already taken.",columnName));
     }
-    columns.push_back(new Column(columnName,dataType));
+    auto* newColumn = new Column(columnName,dataType);
+    columns.push_back(newColumn);
+    if (this->id > 1) {
+        newColumn->insertDefaultValues(this->id);
+    }
 }
 
 auto Table::renameColumn(std::string const& columnName,std::string const &newName) -> void {
@@ -161,6 +165,9 @@ auto Table::selectFilteredColumns(std::vector<std::string> const& selectedColumn
 }
  auto Table::insertValues(std::map<std::string, std::string> const& values)->void { // The key represents the column name, and the value represents the value retrieved from the query.
         int const getID = this->id;
+        if (values.size() != this->columns.size()) {
+            throw std::runtime_error("Missing values for required columns");
+        }
         for (auto const& [columnName,value]:values) {
             auto  getColumn = isColumnExists(columnName);
             if (getColumn != columns.end()) {
@@ -184,4 +191,14 @@ auto Table::setColumns(std::map<std::string,std::string> const& columnData)->std
         columns.push_back(new Column(columnName,dataType));
     }
     return columns;
+}
+auto Table::dropColumn(std::string const& columnName)->void {
+    auto const& getColumn = isColumnExists(columnName);
+    if (getColumn != this->columns.end()) {
+        delete *getColumn;
+        this->columns.erase(getColumn);
+        return;
+    }
+    throw std::runtime_error(std::format("No column with the name {} was found.", columnName));
+
 }

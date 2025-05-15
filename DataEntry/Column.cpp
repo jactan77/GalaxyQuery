@@ -2,8 +2,7 @@
 
 #include "Column.h"
 
-#include <algorithm>
-#include <ranges>
+
 
 
 
@@ -19,6 +18,12 @@ auto Column::insertValue(int const& id,std::string const& value)->void {
     }
                 throw std::runtime_error(std::format("The provided value {} is incompatible with the data type of the column {}.",value,this->name));
 
+}
+auto Column::insertDefaultValues(const int ids)->void {
+    auto const& defaultValue = defaultValues[this->dataType];
+    for (int id = 1; id < ids; id++) {
+        fieldValues.insert({id,defaultValue});
+    }
 }
 auto Column::setName(std::string const& newName)->void {
     this->name=newName;
@@ -44,8 +49,12 @@ auto Column::getFilteredRows(std::string const& value,std::string const& operand
             return *this > value;
         case '<':
             return *this < value;
-        default:
+        default: {
+            if (operand == "!=") {
+                return *this != value;
+            }
             throw std::runtime_error("An invalid operator was used in the query");
+        }
     }
 
 }
@@ -103,9 +112,6 @@ auto Column::printRows(const std::set<int>& ids)  -> std::string {
 
     return result.str();
 }
-
-
-
 auto Column::selectType(std::string const& value)->std::string {
     auto isInt = [](std::string const& str)-> bool {
         const auto isNegative = str.at(0) == '-' ? 1 : 0;
@@ -121,7 +127,6 @@ auto Column::selectType(std::string const& value)->std::string {
         return "CHAR";
     }
     return "STRING";
-
 }
 
 auto Column::toInt(std::string const& value)->int{
