@@ -29,7 +29,7 @@ auto Column::setName(std::string const& newName)->void {
     this->name=newName;
 }
 
-auto Column::getName() -> std::string {
+auto Column::getName() const -> std::string {
     return name;
 };
 auto Column::eraseFieldValues()->void {

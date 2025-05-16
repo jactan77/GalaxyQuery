@@ -135,9 +135,9 @@ auto InterpreterQuery::tokenizeColumns(std::string const& parseColumns)-> std::v
     auto columns = std::vector<std::string>(std::ranges::distance(getColumns));
     std::ranges::transform(getColumns,columns.begin(),[](auto const& segment)->std::string {
                 std::string word(segment.begin(),segment.end());
-                 word = std::regex_replace(word,std::regex("\\s+"),"");
-                 std::cout << std::format("column:{}", word)<< std::endl;
-                 return word;
+                word = std::regex_replace(word,std::regex("\\s+"),"");
+                std::cout << std::format("column:{}", word)<< std::endl;
+                return word;
     });
     return columns;
 }

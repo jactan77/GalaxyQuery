@@ -67,14 +67,16 @@ public:
       ~Column() = default;
       [[nodiscard]] auto findValue(std::string const& value) const;
       [[nodiscard]] auto getFilteredRows(std::string const& value,std::string const& operand) const-> std::vector<int>;
+      [[nodiscard]] auto getName() const -> std::string;
+      [[nodiscard]] auto getDataType() const -> std::string {return dataType;}
+      [[nodiscard]] auto getRows() const ->std::map<int,std::string>{return fieldValues;}
       auto insertValue(int const &id, std::string const &value)->void;
       auto insertDefaultValues(int ids)->void;
-      auto getName() -> std::string;
       auto setName(std::string const& newName)->void;
       auto eraseFieldValues()->void;
       auto printRows(const std::set<int>& ids)->std::string;
       auto updateValue(int const& id, std::string const& newValue)->void;
-      auto calculateWidth() const -> size_t;
+      [[nodiscard]] auto calculateWidth() const -> size_t;
 
 };
 

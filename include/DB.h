@@ -21,7 +21,7 @@ public:
     auto setTable(Table* t)->void;
     auto getDbName()->std::string;
     auto cleanTables()->void;
-
+    auto getTables()-> std::vector<Table*>&{return tables;}
     auto tableExists(std::string const &tableName);
 
 

@@ -5,6 +5,7 @@
 #include <algorithm>
 #include "DB.h"
 #include "InterpreterQuery.h"
+#include "GalaxyQueryExporter.h"
 
 auto main()-> int {
     Db* db = nullptr;
@@ -17,7 +18,7 @@ auto main()-> int {
                                                   |___/
  )";
     std::cout << logo << std::endl;
-
+    GalaxyQueryExporter::loadDb();
 
 
     auto getQuery = std::string();
@@ -33,6 +34,7 @@ auto main()-> int {
             std::cout << "Start typing" << std::endl;
 
     }
+    GalaxyQueryExporter::saveToFile(db);
 
 
 
