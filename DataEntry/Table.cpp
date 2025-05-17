@@ -192,6 +192,12 @@ auto Table::setColumns(std::map<std::string,std::string> const& columnData)->std
     }
     return columns;
 }
+auto Table::setColumns(std::vector<Column*> const& columns)->void {
+    this->columns=columns;
+}
+auto Table::setId(const int id)->void {
+    this->id = id;
+}
 auto Table::dropColumn(std::string const& columnName)->void {
     auto const& getColumn = isColumnExists(columnName);
     if (getColumn != this->columns.end()) {

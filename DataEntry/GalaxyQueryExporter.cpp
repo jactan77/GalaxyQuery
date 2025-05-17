@@ -33,11 +33,11 @@ auto GalaxyQueryExporter::saveToFile(Db*& db) -> void {
     }
     file << output.str();
 }
-auto GalaxyQueryExporter::loadDb()->void {
+auto GalaxyQueryExporter::loadDb()-> Db* {
     std::fstream file("../data.txt",std::ios::in);
     std::string line;
     if (!file || std::filesystem::file_size("../data.txt") == 0 ) {
-        return;
+        return nullptr;
     }
     std::getline(file,line);
     auto const getDbName = parseName(line,std::regex(R"(^DB:([A-Z]+)$)"));
@@ -45,6 +45,7 @@ auto GalaxyQueryExporter::loadDb()->void {
     while (std::getline(file,line)) {
         parseData(db,line);
     }
+    return db;
 }
 auto GalaxyQueryExporter::parseName(const std::string& line,std::regex const& pattern)-> std::string {
     auto name = std::string();
@@ -54,6 +55,7 @@ auto GalaxyQueryExporter::parseName(const std::string& line,std::regex const& pa
     }
     return name;
 }
+
 auto GalaxyQueryExporter::parseData(Db*& db,std::string line)->void {
     auto const& getTableName = parseName(line,std::regex(R"(^(\w+):)"));
     line=std::regex_replace(line,std::regex(R"(^(\w+):)"),"");
@@ -61,11 +63,37 @@ auto GalaxyQueryExporter::parseData(Db*& db,std::string line)->void {
                             | std::ranges::views::transform([](auto const& subrange) {
                                     return std::string(subrange.begin(),subrange.end());
                             });
-    auto columns = std::map<std::string,std::string>();
+    auto columns = std::vector<Column*>();
+    size_t ids = 1;
     for (auto subrange: parseColumns) {
-        auto getColumnName  = parseName(subrange,std::regex(R"(^(\w+)\()"));
-        auto getDataType = parseName(subrange,std::regex(R"(^\w+\((\w+)\))"));
-        columns.insert({getColumnName,getDataType});
+        const auto getColumnName  = parseName(subrange,std::regex(R"(^(\w+)\()"));
+        const auto getDataType = parseName(subrange,std::regex(R"(^\w+\((\w+)\))"));
+        auto* createColumn = new Column(getColumnName,getDataType);
+        auto getFieldValues = parseValues(subrange);
+        ids = getFieldValues.size();
+        createColumn->setFieldValues(getFieldValues);
+        columns.push_back(createColumn);
     }
-    db->processCreateTable(getTableName,columns);
+    if (!columns.empty()) {
+        auto* createTable = new Table(getTableName,columns,static_cast<int>(ids));
+        db->setTable(createTable);
+    }
+
+
+}
+auto GalaxyQueryExporter::parseValues(const std::string& line)->std::map<int,std::string> {
+    auto getValues= parseName(line,std::regex(R"(^\w+\(\w+\)\{([^}]+)\})"));
+    auto parseValues = std::ranges::views::split(getValues,',')
+                            | std::ranges::views::transform([](auto const& subrange) {
+                                    return std::string(subrange.begin(),subrange.end());
+                            });
+    auto fieldValues = std::map<int,std::string>();
+    int id = 1;
+    for (auto it = parseValues.begin(); it != parseValues.end(); ++it) {
+        fieldValues.insert({id,*it});
+        ++id;
+    }
+    return fieldValues;
+
+
 }

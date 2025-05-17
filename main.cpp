@@ -18,7 +18,7 @@ auto main()-> int {
                                                   |___/
  )";
     std::cout << logo << std::endl;
-    GalaxyQueryExporter::loadDb();
+    db=GalaxyQueryExporter::loadDb();
 
 
     auto getQuery = std::string();

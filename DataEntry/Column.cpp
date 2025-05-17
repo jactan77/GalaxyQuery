@@ -112,6 +112,9 @@ auto Column::printRows(const std::set<int>& ids)  -> std::string {
 
     return result.str();
 }
+auto Column::setFieldValues(const std::map<int,std::string> &newFieldValues)->void {
+    this->fieldValues=newFieldValues;
+}
 auto Column::selectType(std::string const& value)->std::string {
     auto isInt = [](std::string const& str)-> bool {
         const auto isNegative = str.at(0) == '-' ? 1 : 0;

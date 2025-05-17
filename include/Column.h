@@ -70,6 +70,7 @@ public:
       [[nodiscard]] auto getName() const -> std::string;
       [[nodiscard]] auto getDataType() const -> std::string {return dataType;}
       [[nodiscard]] auto getRows() const ->std::map<int,std::string>{return fieldValues;}
+      auto setFieldValues(const std::map<int,std::string> &newFieldValues)->void;
       auto insertValue(int const &id, std::string const &value)->void;
       auto insertDefaultValues(int ids)->void;
       auto setName(std::string const& newName)->void;

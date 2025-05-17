@@ -14,10 +14,13 @@ struct Table {
     std::string name;
     std::vector<Column*> columns; // Columns, each having its own field values.
     Table(std::string  name, std::map<std::string,std::string> const& columns):name(std::move(name)),columns(setColumns(columns)),id(1){};
+    Table(std::string  name, std::vector<Column*> const& columns, const int id):name(std::move(name)),columns(columns),id(id){}
     ~Table()=default;
     [[nodiscard]] auto getID() const-> int;
     [[nodiscard]] auto getColumns() const -> std::vector<Column*> {return columns;}
     [[nodiscard]] auto getTableName() const->std::string {return name;}
+    auto setColumns(std::vector<Column*> const& columns)->void;
+    auto setId(int id)->void;
     auto addColumn(std::string const& columnName, std::string const& dataType) -> void;
     auto renameColumn(std::string const& columnName,std::string const& newName)->void;
     auto updateValues(std::map<std::string,std::string> const& values, std::vector<std::string> const& conditions)->void;
