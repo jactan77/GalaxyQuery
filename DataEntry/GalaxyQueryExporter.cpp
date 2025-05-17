@@ -6,31 +6,38 @@
 auto GalaxyQueryExporter::saveToFile(Db*& db) -> void {
     std::fstream file("../data.txt",std::ios::out | std::ios::trunc);
     std::stringstream output;
+    if (db == nullptr) {
+        file << output.str();
+        return;
+    }
     auto const& dbName = db->getDbName();
     auto const& getTables = db->getTables();
     output << std::format("DB:{}",dbName) << '\n';
-    for (const Table* table: getTables) {
-        auto const& getColumns = table->getColumns();
-        output << table->getTableName() << ":";
-        for (Column const* column: getColumns) {
-            output << column->getName() << std::format("({})",column->getDataType());
-            auto rows = column->getRows();
-            std::stringstream values;
-            for (int i = 1; i <= rows.size(); i++) {
-                if (i == rows.size()) {
-                    values << rows[i];
-                    continue;
+    if (!getTables.empty()) {
+        for (const Table* table: getTables) {
+            auto const& getColumns = table->getColumns();
+            output << table->getTableName() << ":";
+            for (Column const* column: getColumns) {
+                output << column->getName() << std::format("({})",column->getDataType());
+                auto rows = column->getRows();
+                std::stringstream values;
+                for (int i = 1; i <= rows.size(); i++) {
+                    if (i == rows.size()) {
+                        values << rows[i];
+                        continue;
+                    }
+                    values << rows[i] << ",";
                 }
-                values << rows[i] << ",";
+                output << "{" << values.str() << "}";
+                if (getColumns.back() == column) {
+                    break;
+                }
+                output << ":";
             }
-            output << "{" << values.str() << "}";
-            if (getColumns.back() == column) {
-                break;
-            }
-            output << ":";
+            output << "\n";
         }
-        output << "\n";
-    }
+
+}
     file << output.str();
 }
 auto GalaxyQueryExporter::loadDb()-> Db* {
@@ -43,7 +50,9 @@ auto GalaxyQueryExporter::loadDb()-> Db* {
     auto const getDbName = parseName(line,std::regex(R"(^DB:([A-Z]+)$)"));
     auto* db = new Db(getDbName);
     while (std::getline(file,line)) {
-        parseData(db,line);
+       if (!line.empty()) {
+           parseData(db,line);
+       }
     }
     return db;
 }
@@ -75,7 +84,7 @@ auto GalaxyQueryExporter::parseData(Db*& db,std::string line)->void {
         columns.push_back(createColumn);
     }
     if (!columns.empty()) {
-        auto* createTable = new Table(getTableName,columns,static_cast<int>(ids));
+        auto* createTable = new Table(getTableName,columns,static_cast<int>(++ids));
         db->setTable(createTable);
     }
 

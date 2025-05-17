@@ -16,7 +16,8 @@ auto Column::insertValue(int const& id,std::string const& value)->void {
         fieldValues.insert({id, value});
         return;
     }
-                throw std::runtime_error(std::format("The provided value {} is incompatible with the data type of the column {}.",value,this->name));
+    std::cout << fieldValues.size() << std::endl;
+    throw std::runtime_error(std::format("The provided value {} is incompatible with the data type of the column {}.",value,this->name));
 
 }
 auto Column::insertDefaultValues(const int ids)->void {

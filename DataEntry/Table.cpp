@@ -168,15 +168,22 @@ auto Table::selectFilteredColumns(std::vector<std::string> const& selectedColumn
         if (values.size() != this->columns.size()) {
             throw std::runtime_error("Missing values for required columns");
         }
+       for (auto const& [columnName,value]:values) {
+            auto getColumn = isColumnExists(columnName);
+            if(getColumn == columns.end()) {
+                throw std::runtime_error(std::format("No column with the name {} was found.",columnName));
+            }
+            if (Column::selectType(value) != (*getColumn)->getDataType()) {
+               throw std::runtime_error(std::format("The provided value {} is incompatible with the data type of the column {}.",value,columnName));
+           }
+        }
         for (auto const& [columnName,value]:values) {
             auto  getColumn = isColumnExists(columnName);
-            if (getColumn != columns.end()) {
                 (*getColumn)->insertValue(getID,value);
-                continue;
-            }
-            throw std::runtime_error(std::format("No column with the name {} was found.",columnName));
         }
         std::cout << std::format("INSERT operation completed. Record ID: {}.",this->id++);
+
+
 }
 
 auto Table::clearRows() -> void {

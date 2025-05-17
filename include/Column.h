@@ -17,7 +17,6 @@ class Column {
       std::string dataType;
       std::map<int,std::string> fieldValues; // key <=> id
 
-      static auto selectType(std::string const& value )->std::string;
       static auto toInt(std::string const& value)->int;
       auto printHeader(size_t width)->std::string;
       static auto printRow(std::string const& value,size_t width) -> std::string;
@@ -77,6 +76,7 @@ public:
       auto eraseFieldValues()->void;
       auto printRows(const std::set<int>& ids)->std::string;
       auto updateValue(int const& id, std::string const& newValue)->void;
+      static auto selectType(std::string const& value )->std::string;
       [[nodiscard]] auto calculateWidth() const -> size_t;
 
 };
