@@ -6,38 +6,45 @@
 #include "DB.h"
 #include "InterpreterQuery.h"
 #include "GalaxyQueryExporter.h"
+#include "GalaxyQueryLoader.h"
 
 auto main()-> int {
     Db* db = nullptr;
     std::string const logo = R"(
-  ____       _            _  ___
- / ___| __ _| | __ ___  _(_)/ _ \ _   _  ___ _ __ _   _
-| |  _ / _` | |/ _` \ \/ / | | | | | | |/ _ \ '__| | | |
-| |_| | (_| | | (_| |>  <| | |_| | |_| |  __/ |  | |_| |
- \____|\__,_|_|\__,_/_/\_\_|\__\_\\__,_|\___|_|   \__, |
-                                                  |___/
+ $$$$$$\   $$$$$$\  $$\        $$$$$$\  $$\   $$\ $$\     $$\  $$$$$$\  $$\   $$\ $$$$$$$$\ $$$$$$$\ $$\     $$\
+$$  __$$\ $$  __$$\ $$ |      $$  __$$\ $$ |  $$ |\$$\   $$  |$$  __$$\ $$ |  $$ |$$  _____|$$  __$$\\$$\   $$  |
+$$ /  \__|$$ /  $$ |$$ |      $$ /  $$ |\$$\ $$  | \$$\ $$  / $$ /  $$ |$$ |  $$ |$$ |      $$ |  $$ |\$$\ $$  /
+$$ |$$$$\ $$$$$$$$ |$$ |      $$$$$$$$ | \$$$$  /   \$$$$  /  $$ |  $$ |$$ |  $$ |$$$$$\    $$$$$$$  | \$$$$  /
+$$ |\_$$ |$$  __$$ |$$ |      $$  __$$ | $$  $$<     \$$  /   $$ |  $$ |$$ |  $$ |$$  __|   $$  __$$<   \$$  /
+$$ |  $$ |$$ |  $$ |$$ |      $$ |  $$ |$$  /\$$\     $$ |    $$ $$\$$ |$$ |  $$ |$$ |      $$ |  $$ |   $$ |
+\$$$$$$  |$$ |  $$ |$$$$$$$$\ $$ |  $$ |$$ /  $$ |    $$ |    \$$$$$$ / \$$$$$$  |$$$$$$$$\ $$ |  $$ |   $$ |
+ \______/ \__|  \__|\________|\__|  \__|\__|  \__|    \__|     \___$$$\  \______/ \________|\__|  \__|   \__|
+                                                                   \___|
+
+
  )";
     std::cout << logo << std::endl;
-    db=GalaxyQueryExporter::loadDb();
-
+    db=GalaxyQueryLoader::loadDb();
+    if (db != nullptr) {
+        std::cout << std::format("Your database: {} has been loaded.",db->getDbName())<< std::endl;
+    }
     auto getQuery = std::string();
     std::cout << "Start typing" << std::endl;
 
 
-    while (std::getline(std::cin,getQuery) &&  getQuery != "end") {
-            try {
-                InterpreterQuery::processQuery(db,getQuery);
-            }  catch (const std::exception & ex) {
-                std::cout <<ex.what() << std::endl;
+    while (std::getline(std::cin,getQuery)) {
+        try {
+            std::ranges::transform(getQuery,getQuery.begin(),::toupper);
+            if (getQuery ==  "SAVE") {
+                break;
             }
-            std::cout << "Start typing" << std::endl;
+            InterpreterQuery::processQuery(db,getQuery);
+        }  catch (const std::exception & ex) {
+            std::cout << ex.what() << std::endl;
+        }
+        std::cout << "Start typing" << std::endl;
 
     }
+    std::cout << "Saving changes to a file.";
     GalaxyQueryExporter::saveToFile(db);
-
-
-
-
-
-
 }

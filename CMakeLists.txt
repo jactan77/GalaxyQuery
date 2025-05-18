@@ -12,7 +12,8 @@ add_executable(GalaxyQuery
         DataEntry/Table.cpp
         DataEntry/Column.cpp
         QueryEngine/InterpreterQuery.cpp
-        DataEntry/GalaxyQueryExporter.cpp
+        QueryEngine/GalaxyQueryExporter.cpp
+        QueryEngine/GalaxyQueryLoader.cpp
 )
 
 target_include_directories(

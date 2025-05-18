@@ -8,10 +8,13 @@
 auto InterpreterQuery::processQuery(Db*& db,std::string const& input) -> void{
             auto tokens = getTokens(input); // tokens.front must match one of {"SELECT", "INSERT", "UPDATE", "DELETE", "CREATE", "ALTER", "DROP"}
             const auto it = GalaxyKeywords.find(tokens.at(0));
-            if (db == nullptr && tokens.at(0) == "CREATE" && tokens.at(1)=="DATABASE" && tokens.size() == 3) {
-                db = new Db(std::string(tokens.at(2)));
-                std::cout << "You have created a database named : " << db->getDbName() << std::endl;
-                return;
+            if (tokens.at(0) == "CREATE" && tokens.at(1)=="DATABASE" && tokens.size() == 3) {
+                if (db == nullptr) {
+                    db = new Db(std::string(tokens.at(2)));
+                    std::cout << "You have created a database named : " << db->getDbName() << std::endl;
+                    return;
+                }
+                throw std::runtime_error("You cannot create a new database because your existing database still exists");
             }
             if (it != GalaxyKeywords.end() && db != nullptr) {
                 it->second(db,std::vector(tokens.begin()+1,tokens.end()));
@@ -21,7 +24,6 @@ auto InterpreterQuery::processQuery(Db*& db,std::string const& input) -> void{
 }
 
 auto InterpreterQuery::getTokens(std::string element)->std::vector<std::string> {
-    std::ranges::transform(element,element.begin(),::toupper);
     auto tokens = std::vector<std::string>();
 
     const std::regex pattern(R"(\(([^)]*)\))");
@@ -37,10 +39,7 @@ auto InterpreterQuery::getTokens(std::string element)->std::vector<std::string> 
         auto& match = *it;
         tokens.push_back(match[1]);
     }
-            for (auto const& token : tokens ) {
-                std::cout << token << std::endl;
-            }
-         return tokens;
+    return tokens;
 }
 auto InterpreterQuery::tokenizeSelectQuery (Db*& db, const std::vector<std::string>& query) -> void {
     if ((query.size() == 3 || query.size() == 5) && query.at(0) == "FROM") {
@@ -72,7 +71,6 @@ auto InterpreterQuery::tokenizeInsertQuery 	(Db*& db, const std::vector<std::str
             std::ranges::transform(parseValues,values.begin(),[](auto const& segment)->std::string{
                 std::string word(segment.begin(),segment.end());
                 word = std::regex_replace(word,std::regex("\\s+"),"");
-                std::cout << std::format("Value {}", word)<< std::endl;
                 return word;
             });
             if (columns.size() != values.size()) {
@@ -125,9 +123,6 @@ auto InterpreterQuery::tokenizeConditions(std::string const& parseCondition) -> 
             }
         }
     }
-    for (auto const& ww: getCondition) {
-        std::cout << ww << std::endl;
-    }
     return getCondition;
 }
 auto InterpreterQuery::tokenizeColumns(std::string const& parseColumns)-> std::vector<std::string> {
@@ -136,7 +131,6 @@ auto InterpreterQuery::tokenizeColumns(std::string const& parseColumns)-> std::v
     std::ranges::transform(getColumns,columns.begin(),[](auto const& segment)->std::string {
                 std::string word(segment.begin(),segment.end());
                 word = std::regex_replace(word,std::regex("\\s+"),"");
-                std::cout << std::format("column:{}", word)<< std::endl;
                 return word;
     });
     return columns;
@@ -163,9 +157,6 @@ auto InterpreterQuery::tokenizeCreateQuery(Db*& db, const std::vector<std::strin
                     std::cout << "Error: Invalid data type '" << datatype << "'" << std::endl;
                     throw std::runtime_error("Invalid data type: " + datatype);
                 }
-
-                std::cout <<"name: " << name << std::endl;
-                std::cout << "type: " << datatype << std::endl;
                 getColumns.emplace_back(name,datatype);
             } else {
                 throw std::runtime_error("Invalid operation");

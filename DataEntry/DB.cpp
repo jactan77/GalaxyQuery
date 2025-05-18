@@ -72,15 +72,6 @@ auto Db::processUpdate(std::string const& tableName, std::map<std::string,std::s
             throw std::runtime_error(std::format("No table with the name {} was found.",tableName));
 }
 auto Db::processSelect(std::string const& tableName,std::vector<std::string> const& columns)-> void{
-                        /* ex
-                    ---------------------------------------
-                    | ID         | Name        | Age      |
-                    |------------|-------------|----------|
-                    | 1          | Alice       | 25       |
-                    | 2          | Bob         | 30       |
-                    | 3          | Charlie     | 35       |
-                    |------------|-------------|----------|
-                        */
         auto const& getTable = this->tableExists(tableName);
         if (getTable != this->tables.end()) {
             (*getTable)->selectColumns(columns);

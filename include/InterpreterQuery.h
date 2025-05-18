@@ -21,7 +21,7 @@ class InterpreterQuery {
 	static	auto tokenizeUpdateQuery	(Db*& db, const std::vector<std::string>& query) -> void;
 	static	auto tokenizeConditions		(std::string const &parseCondition) -> std::vector<std::string>;
 
-	static auto tokenizeColumns(std::string const &parseColumns) -> std::vector<std::string>;
+	static	auto tokenizeColumns(std::string const &parseColumns) -> std::vector<std::string>;
 
 
 	static	auto tokenizeCreateQuery	(Db*& db, const std::vector<std::string>& query) -> void;

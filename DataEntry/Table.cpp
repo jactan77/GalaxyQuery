@@ -61,9 +61,6 @@ auto Table::processConditions(std::vector<std::string> const& conditions) -> std
         auto const& operand  = conditions[i++];
         auto const& value = conditions[i++];
 
-        if (i < conditions.size()) {
-            logicalOp = conditions[i++];
-        }
         auto findColumn  = isColumnExists(columnName);
         if (findColumn == columns.end()) {
             throw std::runtime_error(std::format("No column with the name {} was found.",columnName));
@@ -85,6 +82,9 @@ auto Table::processConditions(std::vector<std::string> const& conditions) -> std
             if (logicalOp == "OR") {
                 matchingRows.insert(currentRows.begin(), currentRows.end());
             }
+        }
+        if (i < conditions.size()) {
+            logicalOp = conditions[i++];
         }
     }
     return matchingRows;

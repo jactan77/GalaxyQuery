@@ -1,62 +1,22 @@
-#include "GalaxyQueryExporter.h"
+#include "GalaxyQueryLoader.h"
 
-#include <filesystem>
-
-
-auto GalaxyQueryExporter::saveToFile(Db*& db) -> void {
-    std::fstream file("../data.txt",std::ios::out | std::ios::trunc);
-    std::stringstream output;
-    if (db == nullptr) {
-        file << output.str();
-        return;
-    }
-    auto const& dbName = db->getDbName();
-    auto const& getTables = db->getTables();
-    output << std::format("DB:{}",dbName) << '\n';
-    if (!getTables.empty()) {
-        for (const Table* table: getTables) {
-            auto const& getColumns = table->getColumns();
-            output << table->getTableName() << ":";
-            for (Column const* column: getColumns) {
-                output << column->getName() << std::format("({})",column->getDataType());
-                auto rows = column->getRows();
-                std::stringstream values;
-                for (int i = 1; i <= rows.size(); i++) {
-                    if (i == rows.size()) {
-                        values << rows[i];
-                        continue;
-                    }
-                    values << rows[i] << ",";
-                }
-                output << "{" << values.str() << "}";
-                if (getColumns.back() == column) {
-                    break;
-                }
-                output << ":";
-            }
-            output << "\n";
-        }
-
-}
-    file << output.str();
-}
-auto GalaxyQueryExporter::loadDb()-> Db* {
+auto GalaxyQueryLoader::loadDb()-> Db* {
     std::fstream file("../data.txt",std::ios::in);
     std::string line;
     if (!file || std::filesystem::file_size("../data.txt") == 0 ) {
         return nullptr;
     }
     std::getline(file,line);
-    auto const getDbName = parseName(line,std::regex(R"(^DB:([A-Z]+)$)"));
+    auto const getDbName = parseName(line,std::regex(R"(^DB:(\w+)$)"));
     auto* db = new Db(getDbName);
     while (std::getline(file,line)) {
-       if (!line.empty()) {
-           parseData(db,line);
-       }
+        if (!line.empty()) {
+            parseData(db,line);
+        }
     }
     return db;
 }
-auto GalaxyQueryExporter::parseName(const std::string& line,std::regex const& pattern)-> std::string {
+auto GalaxyQueryLoader::parseName(const std::string& line,std::regex const& pattern)-> std::string {
     auto name = std::string();
     std::smatch match;
     if (std::regex_search(line,match,pattern)) {
@@ -65,7 +25,7 @@ auto GalaxyQueryExporter::parseName(const std::string& line,std::regex const& pa
     return name;
 }
 
-auto GalaxyQueryExporter::parseData(Db*& db,std::string line)->void {
+auto GalaxyQueryLoader::parseData(Db*& db,std::string line)->void {
     auto const& getTableName = parseName(line,std::regex(R"(^(\w+):)"));
     line=std::regex_replace(line,std::regex(R"(^(\w+):)"),"");
     auto parseColumns = std::ranges::views::split(line,':')
@@ -90,7 +50,7 @@ auto GalaxyQueryExporter::parseData(Db*& db,std::string line)->void {
 
 
 }
-auto GalaxyQueryExporter::parseValues(const std::string& line)->std::map<int,std::string> {
+auto GalaxyQueryLoader::parseValues(const std::string& line)->std::map<int,std::string> {
     auto getValues= parseName(line,std::regex(R"(^\w+\(\w+\)\{([^}]+)\})"));
     auto parseValues = std::ranges::views::split(getValues,',')
                             | std::ranges::views::transform([](auto const& subrange) {
