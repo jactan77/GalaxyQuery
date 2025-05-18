@@ -144,14 +144,14 @@ auto InterpreterQuery::tokenizeColumns(std::string const& parseColumns)-> std::v
 
 auto InterpreterQuery::tokenizeCreateQuery(Db*& db, const std::vector<std::string>& query) -> void {
     if (query.at(0) == "TABLE") {
-        if (query.size() != 3) {
-            throw;
+        if (query.size() != 3 || query.back().empty() || query.at(2).find(',') == std::string::npos) {
+            throw std::runtime_error("Invalid operation");
         }
         const std::regex columnPattern(R"((\w+)\s+(\w+))");
         std::smatch matches;
         auto const& tableName = query.at(1);
         auto parseColumns = query.at(2) | std::views::split(',');
-        auto getColumns = std::map<std::string,std::string>();
+        auto getColumns = std::vector<std::pair<std::string,std::string>>();
         for (auto const& segment: parseColumns) {
             std::string column(segment.begin(), segment.end());
             if (std::regex_search(column, matches, columnPattern)) {
@@ -166,13 +166,15 @@ auto InterpreterQuery::tokenizeCreateQuery(Db*& db, const std::vector<std::strin
 
                 std::cout <<"name: " << name << std::endl;
                 std::cout << "type: " << datatype << std::endl;
-                getColumns.insert({name,datatype});
+                getColumns.emplace_back(name,datatype);
             } else {
                 throw std::runtime_error("Invalid operation");
             }
         }
         db->processCreateTable(tableName,getColumns);
+        return;
     }
+    throw std::runtime_error("Invalid operation");
 }
 auto InterpreterQuery::tokenizeDropQuery (Db*& db, const std::vector<std::string>& query) -> void {
     if (query.at(0)=="DATABASE" && query.size() == 2) {

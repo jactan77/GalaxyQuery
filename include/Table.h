@@ -13,7 +13,7 @@
 struct Table {
     std::string name;
     std::vector<Column*> columns; // Columns, each having its own field values.
-    Table(std::string  name, std::map<std::string,std::string> const& columns):name(std::move(name)),columns(setColumns(columns)),id(1){};
+    Table(std::string  name, std::vector<std::pair<std::string,std::string>> const& columns):name(std::move(name)),columns(setColumns(columns)),id(1){};
     Table(std::string  name, std::vector<Column*> const& columns, const int id):name(std::move(name)),columns(columns),id(id){}
     ~Table()=default;
     [[nodiscard]] auto getID() const-> int;
@@ -33,7 +33,7 @@ private:
     int id; // AUTO_INCREMENT as a PRIMARY_KEY
     auto isColumnExists(std::string const& name);
     [[nodiscard]] auto processConditions(std::vector<std::string> const &conditions)  -> std::set<int>;
-    static auto setColumns(std::map<std::string,std::string> const& columnData)->std::vector<Column*>; // The key represents the column name, and the value represents the dataType.
+    static auto setColumns(std::vector<std::pair<std::string,std::string>> const& columnData)->std::vector<Column*>; // The key represents the column name, and the value represents the dataType.
     static auto printTable(std::vector<Column *> const &columnsToPrint, std::set<int> const &ids)-> std::string;
 };
 

@@ -76,7 +76,7 @@ auto Table::processConditions(std::vector<std::string> const& conditions) -> std
             if (logicalOp == "AND") {
                 std::set<int> uniqueRows;
                 for (int id: matchingRows) {
-                    if (matchingRows.contains(id)) {
+                    if (std::ranges::find(currentRows,id) != currentRows.end()) {
                         uniqueRows.insert(id);
                     }
                 }
@@ -192,7 +192,7 @@ auto Table::clearRows() -> void {
     }
     std::cout << std::format("All rows from the table {} have been deleted.", this->name) << std::endl;
 }
-auto Table::setColumns(std::map<std::string,std::string> const& columnData)->std::vector<Column*> {
+auto Table::setColumns(std::vector<std::pair<std::string,std::string>> const& columnData)->std::vector<Column*> {
     auto columns = std::vector<Column*>();
     for (auto const& [columnName,dataType]:columnData) {
         columns.push_back(new Column(columnName,dataType));

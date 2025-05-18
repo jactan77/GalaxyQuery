@@ -34,7 +34,7 @@ class Column {
             auto filteredIds = std::vector<int>();
             for (auto const& [id,rowValue] : this->fieldValues) {
                   if (this->dataType == "INT" || this->dataType == "BOOL") {
-                        if (compare(toInt(value),toInt(rowValue))) {
+                        if (compare(toInt(rowValue),toInt(value))) {
                               filteredIds.push_back(id);
                         }
                   }else {

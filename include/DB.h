@@ -28,7 +28,7 @@ public:
 
 
 
-    auto processCreateTable(std::string const &tableName, std::map<std::string, std::string> const &columns) -> void;
+    auto processCreateTable(std::string const &tableName, std::vector<std::pair<std::string,std::string>> const &columns) -> void;
     auto processInsert(std::string const& tableName,std::map<std::string, std::string> const& values)-> void;
     auto processUpdate(std::string const& tableName, std::map<std::string,std::string> const& values, std::vector<std::string> const& conditions )-> void;
     auto processDelete(std::string const& tableName)-> void;

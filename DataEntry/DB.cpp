@@ -34,7 +34,7 @@ auto Db::tableExists(std::string const& tableName)   {
 
 
 
-auto Db::processCreateTable(std::string const& tableName, std::map<std::string,std::string> const& columns)-> void {
+auto Db::processCreateTable(std::string const& tableName, std::vector<std::pair<std::string,std::string>> const& columns)-> void {
         if (tableExists(tableName) == this->tables.end()) {
                 this->setTable(new Table(tableName,columns));
                 std::cout << "You have created in DB: " << this->name << " a table named : " << tableName<< std::endl;

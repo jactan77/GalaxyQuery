@@ -20,7 +20,6 @@ auto main()-> int {
     std::cout << logo << std::endl;
     db=GalaxyQueryExporter::loadDb();
 
-
     auto getQuery = std::string();
     std::cout << "Start typing" << std::endl;
 
