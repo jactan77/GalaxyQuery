@@ -8,6 +8,7 @@
 #include "GalaxyQueryExporter.h"
 #include "GalaxyQueryLoader.h"
 
+
 auto main()-> int {
     Db* db = nullptr;
     std::string const logo = R"(
@@ -32,19 +33,22 @@ $$ |  $$ |$$ |  $$ |$$ |      $$ |  $$ |$$  /\$$\     $$ |    $$ $$\$$ |$$ |  $$
     std::cout << "Start typing" << std::endl;
 
 
-    while (std::getline(std::cin,getQuery)) {
+    while (std::getline(std::cin,getQuery) && getQuery != "END" && getQuery != "end") {
         try {
             std::ranges::transform(getQuery,getQuery.begin(),::toupper);
             if (getQuery ==  "SAVE") {
-                break;
+                std::cout << "Saving changes to a file." << std::endl;
+                GalaxyQueryExporter::saveToFile(db);
+                std::cout << "Start typing" << std::endl;
+                continue;
             }
-            InterpreterQuery::processQuery(db,getQuery);
+            if (!getQuery.empty()) {
+                InterpreterQuery::processQuery(db,getQuery);
+            }
         }  catch (const std::exception & ex) {
             std::cout << ex.what() << std::endl;
         }
         std::cout << "Start typing" << std::endl;
 
     }
-    std::cout << "Saving changes to a file.";
-    GalaxyQueryExporter::saveToFile(db);
 }

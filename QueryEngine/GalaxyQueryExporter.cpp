@@ -1,4 +1,4 @@
-#include "../include/GalaxyQueryExporter.h"
+#include "GalaxyQueryExporter.h"
 
 
 

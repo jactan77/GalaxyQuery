@@ -6,7 +6,7 @@
 
 
 auto InterpreterQuery::processQuery(Db*& db,std::string const& input) -> void{
-            auto tokens = getTokens(input); // tokens.front must match one of {"SELECT", "INSERT", "UPDATE", "DELETE", "CREATE", "ALTER", "DROP"}
+            auto tokens = getTokens(input);
             const auto it = GalaxyKeywords.find(tokens.at(0));
             if (tokens.at(0) == "CREATE" && tokens.at(1)=="DATABASE" && tokens.size() == 3) {
                 if (db == nullptr) {
@@ -65,7 +65,7 @@ auto InterpreterQuery::tokenizeInsertQuery 	(Db*& db, const std::vector<std::str
 
             auto const& columns = tokenizeColumns(query.at(3));
             auto values = std::vector<std::string>(std::ranges::distance(parseValues));
-            auto colAndVal = std::map<std::string,std::string>(); // column and value
+            auto colAndVal = std::map<std::string,std::string>();
 
 
             std::ranges::transform(parseValues,values.begin(),[](auto const& segment)->std::string{

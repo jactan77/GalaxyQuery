@@ -37,7 +37,6 @@ auto Table::renameColumn(std::string const& columnName,std::string const &newNam
 }
 auto Table::updateValues(std::map<std::string,std::string> const& values, std::vector<std::string> const& conditions)->void {
         auto const& getMatchingRows = this->processConditions(conditions);
-        // set new Values
         for (auto const& [columnName, value]: values) {
                 auto const& findColumn = isColumnExists(columnName);
                 if (findColumn != this->columns.end()) {
@@ -93,7 +92,7 @@ auto Table::printTable(std::vector<Column*> const& columnsToPrint,std::set<int> 
     std::stringstream result;
     std::vector<std::vector<std::string>> columnLines;
     std::vector<size_t> columnWidths;
-    // get lines and width of each column
+
     for (const auto& column : columnsToPrint) {
         std::stringstream colStream(column->printRows(ids));
         std::vector<std::string> lines;
@@ -107,13 +106,11 @@ auto Table::printTable(std::vector<Column*> const& columnsToPrint,std::set<int> 
         columnWidths.push_back(column->calculateWidth());
     }
 
-    // calculate the maximum number of rows
     size_t maxRows = 0;
     for (const auto& lines : columnLines) {
         maxRows = std::max(maxRows, lines.size());
     }
 
-    // print table with merged columns
     for (size_t rowIndex = 0; rowIndex < maxRows; ++rowIndex) {
         for (size_t colIndex = 0; colIndex < columnLines.size(); ++colIndex) {
             const auto& lines = columnLines[colIndex];
@@ -163,7 +160,7 @@ auto Table::selectFilteredColumns(std::vector<std::string> const& selectedColumn
     std::cout << printTable(columnsToPrint,getFilteredIds);
 
 }
- auto Table::insertValues(std::map<std::string, std::string> const& values)->void { // The key represents the column name, and the value represents the value retrieved from the query.
+ auto Table::insertValues(std::map<std::string, std::string> const& values)->void {
         int const getID = this->id;
         if (values.size() != this->columns.size()) {
             throw std::runtime_error("Missing values for required columns");
