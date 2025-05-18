@@ -1,7 +1,6 @@
 #include <iostream>
 #include <ranges>
 #include <string>
-#include <string_view>
 #include <algorithm>
 #include "DB.h"
 #include "InterpreterQuery.h"
