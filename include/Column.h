@@ -26,6 +26,7 @@ class Column {
             {"CHAR","N"},
             {"BOOL","TRUE"}
       };
+
       template<typename Comparator>
       [[nodiscard]] auto FilterByValue(std::string const& value, Comparator compare) const -> std::vector<int> {
             if (this->dataType != selectType(value)) {
@@ -56,6 +57,14 @@ class Column {
 
       auto operator<(const std::string& value) const -> std::vector<int> {
             return FilterByValue(value,[](const auto& val1, const auto& val2)->bool{return val1 < val2;});
+      }
+
+      auto operator>=(const std::string& value) const -> std::vector<int> {
+            return FilterByValue(value,[](const auto& val1, const auto& val2)->bool{return val1 >= val2;});
+      }
+
+      auto operator<=(const std::string& value) const -> std::vector<int> {
+            return FilterByValue(value,[](const auto& val1, const auto& val2)->bool{return val1 <= val2;});
       }
       auto operator!=(const std::string& value) const -> std::vector<int> {
             return FilterByValue(value,[](const auto& val1, const auto& val2)->bool{return val1 != val2;});

@@ -138,7 +138,7 @@ auto InterpreterQuery::tokenizeColumns(std::string const& parseColumns)-> std::v
 
 auto InterpreterQuery::tokenizeCreateQuery(Db*& db, const std::vector<std::string>& query) -> void {
     if (query.at(0) == "TABLE") {
-        if (query.size() != 3 || query.back().empty() || query.at(2).find(',') == std::string::npos) {
+        if (query.size() != 3 || query.back().empty()) {
             throw std::runtime_error("Invalid operation");
         }
         const std::regex columnPattern(R"((\w+)\s+(\w+))");

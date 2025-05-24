@@ -1,12 +1,6 @@
 
 
 #include "Column.h"
-
-
-
-
-
-
 auto Column::insertValue(int const& id,std::string const& value)->void {
     if (dataType == selectType(value)) {
         auto const it = fieldValues.find(id);
@@ -42,22 +36,19 @@ auto Column::findValue(std::string const& value) const {
     });
 };
 auto Column::getFilteredRows(std::string const& value,std::string const& operand) const-> std::vector<int> {
-    switch (operand[0]) {
-        case '=': {
-            return *this == value;
-        }
-        case '>':
-            return *this > value;
-        case '<':
-            return *this < value;
-        default: {
-            if (operand == "!=") {
-                return *this != value;
-            }
-            throw std::runtime_error("An invalid operator was used in the query");
-        }
+    static const std::unordered_map<std::string, std::function<std::vector<int>(const Column&, const std::string&)>> operators = {
+        {"=",  [](const Column& column, const std::string& val) { return column == val; }},
+        {"!=", [](const Column& column, const std::string& val) { return column != val; }},
+        {">",  [](const Column& column, const std::string& val) { return column > val; }},
+        {"<",  [](const Column& column, const std::string& val) { return column < val; }},
+        {">=", [](const Column& column, const std::string& val) { return column >= val; }},
+        {"<=", [](const Column& column, const std::string& val) { return column <= val; }}
+    };
+    auto const it = operators.find(operand);
+    if (it  == operators.end()) {
+        throw std::runtime_error("An invalid operator was used in the query");
     }
-
+    return it->second(*this,value);
 }
 auto Column::updateValue(int const& id, std::string const& newValue) -> void {
     if (selectType(newValue) != this->dataType) {
