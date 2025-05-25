@@ -43,16 +43,22 @@ auto InterpreterQuery::getTokens(std::string element)->std::vector<std::string> 
 }
 auto InterpreterQuery::tokenizeSelectQuery (Db*& db, const std::vector<std::string>& query) -> void {
     if ((query.size() == 3 || query.size() == 5) && query.at(0) == "FROM") {
-            auto const& tableName = query.at(1);
-            if (query.size() == 5 && query.at(2) == "WHERE") {
-                auto const& getColumns = tokenizeColumns(query.at(3));
-                auto const& getConditions = tokenizeConditions(query.at(4));
-                db->processSelect(tableName,getColumns,getConditions);
-                return;
-            }
-            auto const& getColumns  = tokenizeColumns(query.at(2));
-            db->processSelect(tableName,getColumns);
+        auto const& tableName = query.at(1);
+        if (query.size() == 5 && query.at(2) == "WHERE") {
+            auto const& getColumns = tokenizeColumns(query.at(3));
+            auto const& getConditions = tokenizeConditions(query.at(4));
+            db->processSelect(tableName,getColumns,getConditions);
             return;
+        }
+        if (query.size() == 5 && query.at(2) == "ORDER_BY") {
+            auto const& getColumns = tokenizeColumns(query.at(4));
+            auto const& orderColumn = query.at(3);
+            db->processOrderSelect(tableName,getColumns,orderColumn);
+            return;
+        }
+        auto const& getColumns  = tokenizeColumns(query.at(2));
+      db->processSelect(tableName,getColumns);
+        return;
 
     }
     throw std::runtime_error("Invalid operation");

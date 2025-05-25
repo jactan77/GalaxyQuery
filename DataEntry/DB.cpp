@@ -87,6 +87,15 @@ auto Db::processSelect(std::string const& tableName,std::vector<std::string> con
     }
     throw std::runtime_error(std::format("No table with the name {} was found.",tableName));
 }
+auto Db::processOrderSelect(std::string const& tableName,std::vector<std::string> const& pickedColumns,std::string const& byColumnName)-> void {
+    auto const& getTable = this->tableExists(tableName);
+    if (getTable != this->tables.end()) {
+        (*getTable)->selectOrderedColumns(pickedColumns,byColumnName);
+        return;
+    }
+    throw std::runtime_error(std::format("No table with the name {} was found.",tableName));
+}
+
 
 auto Db::processAlterRename(std::string const& tableName,std::string const& columnName, std::string const& newColumnName)-> void{
     auto const& getTable = this->tableExists(tableName);

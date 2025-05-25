@@ -29,12 +29,14 @@ struct Table {
     auto clearRows() -> void;
     auto selectColumns(std::vector<std::string> const& selectedColumns)-> void;
     auto selectFilteredColumns(std::vector<std::string> const& selectedColumns, std::vector<std::string> const& conditions) -> void;
+    auto selectOrderedColumns(std::vector<std::string> const& selectedColumns,std::string const& orderByColumn)->void;
 private:
     int id;
     auto isColumnExists(std::string const& name);
     [[nodiscard]] auto processConditions(std::vector<std::string> const &conditions)  -> std::set<int>;
     static auto setColumns(std::vector<std::pair<std::string,std::string>> const& columnData)->std::vector<Column*>;
-    static auto printTable(std::vector<Column *> const &columnsToPrint, std::set<int> const &ids)-> std::string;
+    template <std::ranges::range T>
+    static auto printTable(std::vector<Column *> const &columnsToPrint, T const &ids)-> std::string;
 };
 
 

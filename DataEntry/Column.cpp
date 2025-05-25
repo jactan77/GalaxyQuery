@@ -85,27 +85,27 @@ auto Column::calculateWidth() const -> size_t {
     return width;
 }
 
-auto Column::printRows(const std::set<int>& ids)  -> std::string {
-    std::stringstream result;
-    const size_t width = calculateWidth();
-    const std::string line = "+" + std::string(width + 2, '-') + "+";
-
-    result << line << std::endl;
-    result << printHeader(width);
-    result << line << std::endl;
-
-    for (auto const& [id, value]: this->fieldValues) {
-        if (ids.contains(id)) {
-            result << printRow(value, width);
-        }
-    }
-
-    result << line << std::endl;
-
-    return result.str();
-}
 auto Column::setFieldValues(const std::map<int,std::string> &newFieldValues)->void {
     this->fieldValues=newFieldValues;
+}
+auto Column::getOrderedRows() const -> std::vector<int> {
+    auto comp = [this](std::pair<int,std::string> const& p1, std::pair<int,std::string> const& p2)->bool {
+        if (this->dataType == "INT") {
+            return toInt(p1.second) > toInt(p2.second);
+        }
+        return p1.second > p2.second;
+    };
+    auto ids = std::vector<std::pair<int,std::string>>();
+    for (auto const& pair: this->fieldValues) {
+        ids.emplace_back(pair);
+    }
+    std::ranges::sort(ids,comp);
+    auto orderedIds = std::vector<int>();
+    for (const auto &key: ids | std::views::keys) {
+        orderedIds.push_back(key);
+    }
+    std::ranges::reverse(orderedIds);
+    return orderedIds;
 }
 auto Column::selectType(std::string const& value)->std::string {
     auto isInt = [](std::string const& str)-> bool {

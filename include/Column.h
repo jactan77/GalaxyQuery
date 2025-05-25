@@ -5,7 +5,6 @@
 #include <string>
 #include <ranges>
 #include <format>
-#include <utility>
 #include <vector>
 #include <set>
 #include <algorithm>
@@ -78,12 +77,33 @@ public:
       [[nodiscard]] auto getName() const -> std::string;
       [[nodiscard]] auto getDataType() const -> std::string {return dataType;}
       [[nodiscard]] auto getRows() const ->std::map<int,std::string>{return fieldValues;}
+      [[nodiscard]] auto getOrderedRows() const -> std::vector<int>;
       auto setFieldValues(const std::map<int,std::string> &newFieldValues)->void;
       auto insertValue(int const &id, std::string const &value)->void;
       auto insertDefaultValues(int ids)->void;
       auto setName(std::string const& newName)->void;
       auto eraseFieldValues()->void;
-      auto printRows(const std::set<int>& ids)->std::string;
+      template <std::ranges::range T>
+      auto printRows(const T& ids)  -> std::string {
+            std::stringstream result;
+            const size_t width = calculateWidth();
+            const std::string line = "+" + std::string(width + 2, '-') + "+";
+
+            result << line << std::endl;
+            result << printHeader(width);
+            result << line << std::endl;
+            for (auto const& id: ids) {
+                  auto getRow = this->fieldValues.find(id);
+                  if (getRow != this->fieldValues.end()) {
+                        std::cout << getRow->second << std::endl;
+                        result << printRow(getRow->second,width);
+                  }
+            }
+
+            result << line << std::endl;
+
+            return result.str();
+      }
       auto updateValue(int const& id, std::string const& newValue)->void;
       static auto selectType(std::string const& value )->std::string;
       [[nodiscard]] auto calculateWidth() const -> size_t;

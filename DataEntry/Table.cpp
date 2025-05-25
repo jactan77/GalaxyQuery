@@ -88,7 +88,8 @@ auto Table::processConditions(std::vector<std::string> const& conditions) -> std
     }
     return matchingRows;
 }
-auto Table::printTable(std::vector<Column*> const& columnsToPrint,std::set<int> const& ids)-> std::string {
+template <std::ranges::range T>
+auto Table::printTable(std::vector<Column*> const& columnsToPrint,T const& ids)-> std::string {
     std::stringstream result;
     std::vector<std::vector<std::string>> columnLines;
     std::vector<size_t> columnWidths;
@@ -160,6 +161,29 @@ auto Table::selectFilteredColumns(std::vector<std::string> const& selectedColumn
     std::cout << printTable(columnsToPrint,getFilteredIds);
 
 }
+auto Table::selectOrderedColumns(std::vector<std::string> const& selectedColumns,std::string const& orderByColumn)->void {
+    std::vector<Column*> columnsToPrint;
+    if (selectedColumns.size() == 1 && selectedColumns[0] == "*") {
+        columnsToPrint = this->columns;
+    } else {
+        for (const auto& columnName : selectedColumns) {
+            auto columnIt = isColumnExists(columnName);
+            if (columnIt == this->columns.end()) {
+                throw std::runtime_error(std::format("No column with the name {} was found.", columnName));
+            }
+            columnsToPrint.push_back(*columnIt);
+        }
+    }
+    const auto getOrderByColumn = isColumnExists(orderByColumn);
+    if (getOrderByColumn == this->columns.end()) {
+        throw std::runtime_error(std::format("No column with the name {} was found.", orderByColumn));
+    }
+
+    const std::vector<int> getOrderedIds =(*getOrderByColumn)->getOrderedRows();
+    std::cout << printTable(columnsToPrint,getOrderedIds);
+
+}
+
  auto Table::insertValues(std::map<std::string, std::string> const& values)->void {
         int const getID = this->id;
         if (values.size() != this->columns.size()) {

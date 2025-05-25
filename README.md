@@ -60,14 +60,14 @@ Below are a few examples of how to use the system via the query interpreter:
 1. **Create a Table**
 
 ```sql
-CREATE TABLE students (id INT, name STRING, grade INT);
+CREATE TABLE students (id INT, name STRING, grade INT)
 ```
 
 2. **Insert Values**
 
 ```sql
-INSERT INTO students (id, name, grade) VALUES (1, Alice, 95);
-INSERT INTO students (id, name, grade) VALUES (2, Bob, 88);
+INSERT INTO students (id, name, grade) VALUES (1, Alice, 95)
+INSERT INTO students (id, name, grade) VALUES (2, Bob, 88)
 ```
 
 3. **Query Data**
@@ -79,19 +79,19 @@ SELECT (name, grade) FROM students WHERE (grade > 90)
 4. **Update Values**
 
 ```sql
-UPDATE students SET (grade = 92) WHERE (name = Bob)
+UPDATE (students) SET (grade = 92) WHERE (name = Bob)
 ```
 
 5. **Delete Values**
 
 ```sql
-DELETE FROM students;
+DELETE FROM students
 ```
 
 6. **Drop a Column**
 
 ```sql
-ALTER TABLE students DROP COLUMN grade;
+ALTER TABLE students DROP COLUMN grade
 ```
 
 ### Data Persistence

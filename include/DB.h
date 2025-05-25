@@ -37,7 +37,7 @@ public:
     auto processAlterDelete(std::string const& tableName,std::string const& columnName)->void;
     auto processSelect(std::string const& tableName,std::vector<std::string> const& columns)-> void;
     auto processSelect(std::string const& tableName,std::vector<std::string> const& columns,std::vector<std::string> const& conditions)-> void;
-
+    auto processOrderSelect(std::string const& tableName,std::vector<std::string> const& pickedColumns,std::string const& byColumnName)-> void;
     auto processTableDrop(std::string const& tableName)-> void;
 
 
