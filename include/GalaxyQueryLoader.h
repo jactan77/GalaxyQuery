@@ -1,15 +1,19 @@
 #pragma once
+#include "Column.h"
 #include "DB.h"
 #include "Table.h"
-#include "Column.h"
-#include <sstream>
-#include <fstream>
 #include <filesystem>
+#include <fstream>
+#include <sstream>
 
 class GalaxyQueryLoader {
-    auto static parseData(Db*& db,std::string line)->void;
-    auto static parseValues(const std::string &line)->std::map<int,std::string>;
-    auto static parseName(const std::string& line,std::regex const& pattern)->std::string;
 public:
-    auto static loadDb()->Db*;
+  static auto loadDb() -> std::unique_ptr<Db>;
+
+private:
+  static auto parseData(Db &db, std::string line) -> void;
+  static auto parseValues(const std::string &line)
+      -> std::map<int, std::string>;
+  static auto parseName(const std::string &line, std::regex const &pattern)
+      -> std::string;
 };

@@ -1,11 +1,13 @@
 #pragma once
+#include "Column.h"
 #include "DB.h"
 #include "Table.h"
-#include "Column.h"
-#include <sstream>
-#include <fstream>
 #include <filesystem>
+#include <fstream>
+#include <sstream>
+
 class GalaxyQueryExporter {
 public:
-    auto static saveToFile(Db*& db) -> void;
+  static auto saveToFile(const Db &db) -> void;
+  static auto saveToFile(std::nullptr_t) -> void;
 };

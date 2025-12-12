@@ -1,50 +1,58 @@
 #pragma once
-#include <iostream>
+#include "DB.h"
 #include <algorithm>
 #include <functional>
-#include <ranges>
-
-#include "DB.h"
-#include <string>
-#include <vector>
+#include <iostream>
 #include <map>
+#include <memory>
+#include <ranges>
 #include <regex>
-
-
-
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 class InterpreterQuery {
-	static 	auto getTokens				(std::string element)->std::vector<std::string>;
-    static 	auto initializeCreate		(std::string createStatement) -> bool;
-    static	auto tokenizeSelectQuery	(Db*& db, const std::vector<std::string>& query) -> void;
-	static	auto tokenizeInsertQuery	(Db*& db, const std::vector<std::string>& query) -> void;
-	static	auto tokenizeUpdateQuery	(Db*& db, const std::vector<std::string>& query) -> void;
-	static	auto tokenizeConditions		(std::string const &parseCondition) -> std::vector<std::string>;
+public:
+  static auto processQuery(std::unique_ptr<Db> &db, std::string const &input)
+      -> void;
 
-	static	auto tokenizeColumns(std::string const &parseColumns) -> std::vector<std::string>;
+private:
+  using QueryHandler =
+      std::function<void(Db &, const std::vector<std::string> &)>;
+  using DropHandler = std::function<void(std::unique_ptr<Db> &,
+                                         const std::vector<std::string> &)>;
 
+  static auto getTokens(std::string element) -> std::vector<std::string>;
+  static auto tokenizeConditions(std::string const &parseCondition)
+      -> std::vector<std::string>;
+  static auto tokenizeColumns(std::string const &parseColumns)
+      -> std::vector<std::string>;
 
-	static	auto tokenizeCreateQuery	(Db*& db, const std::vector<std::string>& query) -> void;
-	static	auto tokenizeDropQuery   	(Db*& db, const std::vector<std::string>& query) -> void;
-	static	auto tokenizeAlterQuery  	(Db*& db, const std::vector<std::string>& query) -> void;
-	static	auto tokenizeDeleteQuery	(Db*& db, const std::vector<std::string>& query) -> void;
-	static	inline auto dataTypes = std::vector<std::string>{
-        "INT","STRING", "CHAR", "BOOL"
-	};
-    static inline auto const GalaxyKeywords = std::map<std::string, std::function<void(Db*& db, const std::vector<std::string>& query)>>{
-		{"SELECT", tokenizeSelectQuery},
-    	{"INSERT", tokenizeInsertQuery},
-		{"UPDATE", tokenizeUpdateQuery},
-		{"CREATE", tokenizeCreateQuery},
-		{"DROP",	tokenizeDropQuery},
-		{"ALTER",  tokenizeAlterQuery},
-		{"DELETE", tokenizeDeleteQuery}
-    };
-  	public:
-          static auto processQuery(Db*& db,std::string const& input)->void;
+  static auto handleSelect(Db &db, const std::vector<std::string> &query)
+      -> void;
+  static auto handleInsert(Db &db, const std::vector<std::string> &query)
+      -> void;
+  static auto handleUpdate(Db &db, const std::vector<std::string> &query)
+      -> void;
+  static auto handleCreate(Db &db, const std::vector<std::string> &query)
+      -> void;
+  static auto handleAlter(Db &db, const std::vector<std::string> &query)
+      -> void;
+  static auto handleDelete(Db &db, const std::vector<std::string> &query)
+      -> void;
+  static auto handleDrop(std::unique_ptr<Db> &db,
+                         const std::vector<std::string> &query) -> void;
+
+  static inline const std::unordered_map<std::string, QueryHandler>
+      queryHandlers = {{"SELECT", handleSelect}, {"INSERT", handleInsert},
+                       {"UPDATE", handleUpdate}, {"CREATE", handleCreate},
+                       {"ALTER", handleAlter},   {"DELETE", handleDelete}};
+
+  static inline const std::unordered_set<std::string> validDataTypes = {
+      "INT", "STRING", "CHAR", "BOOL"};
+
+  static auto isValidDataType(const std::string &type) -> bool {
+    return validDataTypes.find(type) != validDataTypes.end();
+  }
 };
-
-
-
-
-
